@@ -3,7 +3,7 @@ import './tailwind.css'
 import { ConfigProvider } from 'antd'
 
 export const metadata: Metadata = {
-  title: 'Mail Box',
+  title: 'MailBox',
 }
 
 export const viewport: Viewport = {

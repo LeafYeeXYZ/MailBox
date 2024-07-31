@@ -1,4 +1,4 @@
-export default function Register() {
+export default function Reset() {
   return (
     <>
       <div className="text-center">Under Construction</div>
