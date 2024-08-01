@@ -11,6 +11,6 @@ export async function POST(req: Request): Promise<Response> {
   const { from, to, mail }: { from: string, to: string, mail: string } = await req.json()
   const data = await PostalMime.parse(mail)
   // 将邮件数据插入到收件箱
-  await inbox.insertOne({ ...data })
+  await inbox.insertOne({ ...data, workers: { from, to } })
   return new Response('OK')
 }
