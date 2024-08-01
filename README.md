@@ -1,5 +1,5 @@
 # MailBox 🚧 WIP
-MailBox is a web application that allows you to send and receive emails serverlessly and costlessly.
+MailBox is a web application that allows you to send and receive emails serverlessly and costlessly with your custom domain.
 
 ## TODO
 - [ ] 身份验证和用户数据存储 (MongoDB)
