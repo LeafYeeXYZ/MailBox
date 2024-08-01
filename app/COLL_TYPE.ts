@@ -1,3 +1,5 @@
+import type { Email } from 'postal-mime'
+
 export type UserData = {
   /** 邮箱地址 */
   email: string
@@ -22,13 +24,11 @@ export type UserData = {
 }
 
 export type InboxData = {
-  /** 发件人 */
-  from: string
-  /** 收件人 */
-  to: string
-
-
-}
+  workers: {
+    from: string
+    to: string
+  }
+} & Email
 
 export type SentData = {
 

@@ -5,6 +5,7 @@ import { UserOutlined, KeyOutlined, ExportOutlined } from '@ant-design/icons'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { auth } from './action'
 
 type FieldType = {
   email: string
@@ -24,13 +25,9 @@ export default function Login() {
       duration: 0,
       key: 'logining'
     })
-    await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: values.email, password: values.password })
-    }).then(res => {
-      messageAPI.destroy()
-      if (res.status === 200) {
+    await auth(values.email, values.password)
+      .then(() => {
+        messageAPI.destroy()
         messageAPI.open({
           type: 'success',
           content: '登录成功 (2秒后自动跳转)',
@@ -49,25 +46,16 @@ export default function Login() {
         setTimeout(() => {
           router.push('/inbox')
         }, 2000)
-      } else if (res.status === 401) {
+      })
+      .catch((err) => {
+        messageAPI.destroy()
         messageAPI.open({
           type: 'error',
-          content: '邮箱地址或密码错误',
+          content: err.message,
           duration: 3,
           key: 'error'
         })
-      } else {
-        throw new Error('未知错误')
-      }
-    }).catch(() => {
-      messageAPI.destroy()
-      messageAPI.open({
-        type: 'error',
-        content: '登录失败, 未知错误',
-        duration: 3,
-        key: 'error'
       })
-    })
   }
 
   useEffect(() => {
