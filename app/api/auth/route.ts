@@ -1,5 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { MongoClient } from 'mongodb'
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  return NextResponse.json({ message: 'Hello, world!' })
+// 连接 MongoDB
+const client = new MongoClient(process.env.MONGODB_URI!)
+const db = client.db('mailbox')
+const inbox = db.collection('user')
+
+export async function POST(req: Request): Promise<Response> {
+  const { email, password }: { email: string, password: string } = await req.json()
+  const user = await inbox.findOne({
+    email,
+    password
+  })
+  if (!user) {
+    return new Response('Unauthorized', { status: 401 })
+  }
+  return new Response('OK')
 }

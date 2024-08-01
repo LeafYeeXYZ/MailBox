@@ -1,24 +1,85 @@
 'use client'
 
-import { Button, Checkbox, Input, Form, Flex } from 'antd'
+import { Button, Checkbox, Input, Form, Flex, message } from 'antd'
 import { UserOutlined, KeyOutlined, ExportOutlined } from '@ant-design/icons'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 type FieldType = {
-  username?: string
-  password?: string
-  remember?: string
+  email: string
+  password: string
+  remember?: boolean
 }
 
 export default function Login() {
 
-  const handleSubmit = (values: FieldType) => {
-    console.log('Received values of form: ', values)
+  const router = useRouter()
+  const [messageAPI, contextHolder] = message.useMessage()
+
+  const handleSubmit = async (values: FieldType) => {
+    messageAPI.open({
+      type: 'loading',
+      content: '正在登录...',
+      duration: 0,
+      key: 'logining'
+    })
+    await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: values.email, password: values.password })
+    }).then(res => {
+      messageAPI.destroy()
+      if (res.status === 200) {
+        messageAPI.open({
+          type: 'success',
+          content: '登录成功 (2秒后自动跳转)',
+          duration: 2,
+          key: 'success'
+        })
+        if (values.remember) {
+          sessionStorage.clear()
+          localStorage.setItem('email', values.email)
+          localStorage.setItem('password', values.password)
+        } else {
+          localStorage.clear()
+          sessionStorage.setItem('email', values.email)
+          sessionStorage.setItem('password', values.password)
+        }
+        setTimeout(() => {
+          router.push('/inbox')
+        }, 2000)
+      } else if (res.status === 401) {
+        messageAPI.open({
+          type: 'error',
+          content: '邮箱地址或密码错误',
+          duration: 3,
+          key: 'error'
+        })
+      } else {
+        throw new Error('未知错误')
+      }
+    }).catch(() => {
+      messageAPI.destroy()
+      messageAPI.open({
+        type: 'error',
+        content: '登录失败, 未知错误',
+        duration: 3,
+        key: 'error'
+      })
+    })
   }
+
+  useEffect(() => {
+    if (localStorage.getItem('email') && localStorage.getItem('password')) {
+      router.push('/inbox')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className='relative w-full h-full flex flex-col items-center justify-center'>
-
+      {contextHolder}
       <Form<FieldType>
         name='login'
         initialValues={{ remember: true }}
@@ -30,7 +91,7 @@ export default function Login() {
         </Form.Item>
 
         <Form.Item
-          name='username'
+          name='email'
           rules={[{ type: 'email', message: '请输入正确的邮箱地址', }, { required: true, message: '请输入邮箱地址', }]}
         >
           <Input prefix={<UserOutlined />} placeholder='邮箱地址' type='email' />

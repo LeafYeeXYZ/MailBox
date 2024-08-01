@@ -26,7 +26,7 @@ export type InboxData = {
   from: string
   /** 收件人 */
   to: string
-  
+
 
 }
 

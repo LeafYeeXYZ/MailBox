@@ -2,7 +2,7 @@
 MailBox is a web application that allows you to send and receive emails serverlessly and costlessly with your custom domain.
 
 ## TODO
-- [ ] 身份验证和用户数据存储 (MongoDB)
+- [x] 身份验证和用户数据存储 (MongoDB)
 - [ ] 个人资料页面
 - [ ] 发送邮件功能 (Resend)
 - [ ] 已发送邮件页面
@@ -15,11 +15,13 @@ MailBox is a web application that allows you to send and receive emails serverle
 ### 1 Get MongoDB Atlas URI
 Create a new project in [MongoDB Atlas](https://www.mongodb.com/) and get the URI of the cluster.
 
+> Currently, you need to manually create the admin user in the `users` collection of the MongoDB database.
+
 ### 2 Config Resend
 Create a new project in [Resend](https://resend.com/), and create a new API key. Note that the domain you use in Resend should be the same as the domain you use in Cloudflare.
 
-### 3 Config Vercel Environment Variables
-Congifure the following environment variables in `Vercel` or `.env` file.
+### 3 Deploy to Vercel
+Deploy this `Next.js` project to `Vercel` with the following environment variables in `Vercel` or `.env` file.
 
 | Variable | Description | Default | Required |
 |:--------:|:-----------:|:-------:|:--------:|
@@ -57,11 +59,6 @@ bun run deploy
 3. Click on `Email Routing`.
 4. Click on `Routing Rules`.
 5. Set `Catch All` to forward all mail to the workers you just deployed.
-
-### 7 Deploy to Vercel
-Deploy this `Next.js` project to `Vercel`.
-
-> Currently, you need to manually create the admin user in the `users` collection of the MongoDB database.
 
 ## License
 [GPL-3.0](./LICENSE)
