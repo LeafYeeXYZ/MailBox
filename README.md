@@ -51,7 +51,6 @@ Run the following command to deploy the workers.
 cd ./workers
 bun install
 bunx wrangler login
-bun run cf-typegen
 bun run deploy
 ```
 
