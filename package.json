@@ -11,7 +11,9 @@
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
     "antd": "^5.19.4",
+    "mongodb": "^6.8.0",
     "next": "14.2.5",
+    "postal-mime": "^2.2.7",
     "react": "^18",
     "react-dom": "^18",
     "resend": "^3.5.0"

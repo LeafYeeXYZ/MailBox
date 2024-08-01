@@ -1,5 +1,6 @@
 .DS_Store
-
+workers/wrangler.toml
+workers/.wrangler
 # Logs
 logs
 *.log

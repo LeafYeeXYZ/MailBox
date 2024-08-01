@@ -22,6 +22,11 @@ export type UserData = {
 }
 
 export type InboxData = {
+  /** 发件人 */
+  from: string
+  /** 收件人 */
+  to: string
+  
 
 }
 
