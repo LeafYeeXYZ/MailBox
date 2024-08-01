@@ -24,7 +24,7 @@ export function Nav() {
           sessionStorage.clear()
           router.push('/login')
         }}
-      ><DisconnectOutlined /> 退出登录</a>
+      ><DisconnectOutlined /> 注销</a>
     </div>
   )
 }
