@@ -47,11 +47,12 @@ export default function Login() {
           router.push('/inbox')
         }, 2000)
       })
-      .catch((err) => {
+      // 注: Server Action 不会返回原始错误信息
+      .catch(() => {
         messageAPI.destroy()
         messageAPI.open({
           type: 'error',
-          content: err.message,
+          content: '登录失败, 请检查邮箱地址和密码',
           duration: 3,
           key: 'error'
         })
