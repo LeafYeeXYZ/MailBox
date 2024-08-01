@@ -27,6 +27,7 @@ Deploy this `Next.js` project to `Vercel` with the following environment variabl
 |:--------:|:-----------:|:-------:|:--------:|
 | `RESEND_API_KEY` | API key of Resend | | Yes |
 | `MONGODB_URI` | URI of MongoDB Atlas | | Yes |
+| `PEER_AUTH_KEY` | For authenticating between Cloudflare Workers and Next.js | | Yes |
 
 ### 4 Config Workers Environment Variables
 Create `/workers/wrangler.toml` and add the following content.
@@ -40,6 +41,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 NEXT_ENDPOINT = "https://<YOUR_NEXTJS_PROJECT_DOMAIN>/api/receive"
+PEER_AUTH_KEY = "<YOUR_PEER_AUTH_KEY>"
 ```
 
 ### 5 Deploy Workers

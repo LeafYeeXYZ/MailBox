@@ -6,7 +6,7 @@ export default {
 		const { from, to, raw } = message
 		// 解析邮件
 		const mail = await new Response(raw).text()
-		const data = JSON.stringify({ from, to, mail })
+		const data = JSON.stringify({ from, to, mail, auth: env.PEER_AUTH_KEY })
 		// 发送数据到接收API
 		await fetch(env.NEXT_ENDPOINT, {
 			method: 'POST',
