@@ -4,7 +4,7 @@ import { Button, Checkbox, Input, Form, Flex, message } from 'antd'
 import { UserOutlined, KeyOutlined, ExportOutlined } from '@ant-design/icons'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState, useOptimistic } from 'react'
 import { auth } from './action'
 
 type FieldType = {
@@ -17,8 +17,14 @@ export default function Login() {
 
   const router = useRouter()
   const [messageAPI, contextHolder] = message.useMessage()
+  const [disableForm] = useState(false)
+  const [disableState, setDisableState] = useOptimistic(
+    disableForm, 
+    (_, value: boolean) => value
+  )
 
   const handleSubmit = async (values: FieldType) => {
+    setDisableState(true)
     messageAPI.open({
       type: 'loading',
       content: '正在登录...',
@@ -26,7 +32,7 @@ export default function Login() {
       key: 'logining'
     })
     await auth(values.email, values.password)
-      .then(() => {
+      .then(username => {
         messageAPI.destroy()
         messageAPI.open({
           type: 'success',
@@ -36,10 +42,12 @@ export default function Login() {
         })
         if (values.remember) {
           sessionStorage.clear()
+          localStorage.setItem('username', username)
           localStorage.setItem('email', values.email)
           localStorage.setItem('password', values.password)
         } else {
           localStorage.clear()
+          sessionStorage.setItem('username', username)
           sessionStorage.setItem('email', values.email)
           sessionStorage.setItem('password', values.password)
         }
@@ -74,9 +82,10 @@ export default function Login() {
         initialValues={{ remember: true }}
         className='w-11/12'
         onFinish={handleSubmit}
+        disabled={disableState}
       >
         <Form.Item>
-          <p className='text-2xl font-bold text-center'>MailBox</p>
+          <p className='mb-4 text-2xl font-bold text-center'>MailBox</p>
         </Form.Item>
 
         <Form.Item
