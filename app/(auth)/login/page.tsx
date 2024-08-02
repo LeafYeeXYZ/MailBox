@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useOptimistic } from 'react'
 import { auth } from './action'
+import sha256 from 'crypto-js/sha256'
 
 type FieldType = {
   email: string
@@ -24,6 +25,8 @@ export default function Login() {
   )
 
   const handleSubmit = async (values: FieldType) => {
+    // 加密
+    const password = sha256(values.password).toString()
     setDisableState(true)
     messageAPI.open({
       type: 'loading',
@@ -31,7 +34,7 @@ export default function Login() {
       duration: 0,
       key: 'logining'
     })
-    await auth(values.email, values.password)
+    await auth(values.email, password)
       .then(username => {
         messageAPI.destroy()
         messageAPI.open({
@@ -44,12 +47,12 @@ export default function Login() {
           sessionStorage.clear()
           localStorage.setItem('username', username)
           localStorage.setItem('email', values.email)
-          localStorage.setItem('password', values.password)
+          localStorage.setItem('password', password)
         } else {
           localStorage.clear()
           sessionStorage.setItem('username', username)
           sessionStorage.setItem('email', values.email)
-          sessionStorage.setItem('password', values.password)
+          sessionStorage.setItem('password', password)
         }
         setTimeout(() => {
           router.push('/inbox')

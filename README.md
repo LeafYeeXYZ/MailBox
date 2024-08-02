@@ -16,7 +16,7 @@ MailBox is a web application that allows you to send and receive emails serverle
 ### 1 Get MongoDB Atlas URI
 Create a new project in [MongoDB Atlas](https://www.mongodb.com/) and get the URI of the cluster.
 
-> Currently, you need to manually create the admin user in the `users` collection of the MongoDB database.
+> Currently, you need to manually create users in the `user` collection of the MongoDB database. The type definition can be found in `/app/COLL_TYPE.ts`.
 
 ### 2 Config Resend
 Create a new project in [Resend](https://resend.com/), and create a new API key. Note that the domain you use in Resend should be the same as the domain you use in Cloudflare.
