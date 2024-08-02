@@ -4,11 +4,13 @@ MailBox is a web application that allows you to send and receive emails serverle
 ## TODO
 - [x] 身份验证和用户数据存储 (MongoDB)
 - [x] 接收邮件功能 (Cloudflare Mail Workers -> Next.js -> MongoDB)
+- [x] 注册功能 (服务端注册条件控制)
+- [ ] 单条邮件阅读组件
+- [ ] 夜间模式
 - [ ] 个人资料页面
 - [ ] 发送邮件功能 (Resend)
 - [ ] 已发送邮件页面
 - [ ] 支持 Markdown 写邮件 (Marked)
-- [ ] 注册功能 (服务端注册条件控制)
 - [ ] 找回密码功能 (向备用邮箱发送验证码)
 - [ ] AI 总结邮件内容生成邮件摘要 (Cloudflare Workers AI)
 
@@ -29,6 +31,9 @@ Deploy this `Next.js` project to `Vercel` with the following environment variabl
 | `RESEND_API_KEY` | API key of Resend | | Yes |
 | `MONGODB_URI` | URI of MongoDB Atlas | | Yes |
 | `PEER_AUTH_KEY` | For authenticating between Cloudflare Workers and Next.js | | Yes |
+| `NEXT_PUBLIC_MAIL_SERVER` | The domain of your mail server, e.g. `mail.example.com` | | Yes |
+| `REGISTRY_KEY` | If set, only users with this key can register | | |
+| `NEXT_PUBLIC_REGISTRY_SET` | If `REGISTRY_KEY` is set, this should be set to `true` | | |
 
 ### 4 Config Workers Environment Variables
 Create `/workers/wrangler.toml` and add the following content.

@@ -3,7 +3,7 @@ export default function AuthLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <div
-      className='flex items-center justify-center h-dvh w-dvw bg-gray-50 dark:bg-gray-950'
+      className='flex items-center justify-center h-dvh w-dvw bg-gray-50'
     >
       <div
         className='w-[95%] h-[95%] max-w-[45rem] max-h-[30rem] flex flex-row gap-4 p-4 bg-white rounded-lg shadow-lg'

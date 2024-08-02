@@ -8,11 +8,11 @@ export type UserData = {
   /** 
    * 密码, 经过 sha256 加密  
    * 登录时客户端先 sha256 加密再与数据库中的密码比对, 登录成功后存储加密后的密码    
-   * 注册时密码直接传递到服务器, 服务器再 md5 加密后存储
+   * 注册时密码直接传递到服务器(Server Action), 服务器再 sha256 加密后存储
    */
   password: string
   /** 角色 */
-  role: 'user' | 'admin'
+  role: 'user' | 'admin' | 'guest'
   /** 是否激活 */
   active: boolean
   /** 创建时间 */
