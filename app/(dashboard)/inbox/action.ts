@@ -26,7 +26,7 @@ export async function getMails(email: string, password: string, limit: number, s
     return '401'
   }
   // 获取邮箱列表
-  const data = inbox.find({ 'workers.to': email }).sort({ date: -1 }).skip(skip).limit(limit)
+  const data = inbox.find({ 'workers.to': email }).sort({ date: -1 }).skip(skip).limit(limit).project({ text: 1, subject: 1, date: 1, workers: 1 })
   const mails: Mail[] = []
   for await (const doc of data) {
     mails.push({
