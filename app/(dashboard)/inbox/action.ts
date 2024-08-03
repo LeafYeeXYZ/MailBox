@@ -18,6 +18,21 @@ export type Mail = {
   attachments?: string[]
 }
 
+// 删除特定邮件
+export async function deleteEmail(email: string, password: string, _id: string): Promise<boolean | string> {
+  // 验证邮箱和密码
+  const auth = await user.findOne({ email, password })
+  if (!auth) {
+    return '401'
+  }
+  // 删除邮箱
+  const res = await inbox.deleteOne({ _id: new ObjectId(_id) })
+  if (res.deletedCount === 0) {
+    return '404'
+  }
+  return true
+}
+
 // 返回特定邮件
 export async function getEmail(email: string, password: string, _id: string): Promise<Mail | string> {
   // 验证邮箱和密码

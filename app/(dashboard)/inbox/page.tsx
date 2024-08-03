@@ -1,9 +1,9 @@
 'use client'
 
-import { Button, message, Drawer } from 'antd'
-import { LoadingOutlined, CaretDownFilled } from '@ant-design/icons'
+import { Button, message, Drawer, Popconfirm } from 'antd'
+import { LoadingOutlined, CaretDownFilled, DeleteOutlined } from '@ant-design/icons'
 import { useState, useEffect, useRef } from 'react'
-import { getMails, Mail, getEmail } from './action'
+import { getMails, Mail, getEmail, deleteEmail } from './action'
 import { useRouter } from 'next/navigation'
 import { flushSync } from 'react-dom'
 
@@ -72,6 +72,22 @@ export default function Inbox() {
         setOpen(false)
       })
   }
+  const handleDeleteEmail = async (_id: string) => {
+    const res = await deleteEmail(emailRef.current, passwordRef.current, _id)
+    if (res === '401') {
+      messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+      localStorage.clear()
+      sessionStorage.clear()
+      setTimeout(() => {
+        router.push('/login')
+      }, 2000)
+    } else if (res === '404') {
+      messageAPI.error('邮件不存在')
+    } else {
+      messageAPI.success('删除成功')
+      setMails(mails.filter(mail => mail._id !== _id))
+    }
+  }
 
   // 从服务器获取初始化邮件
   useEffect(() => {
@@ -114,7 +130,7 @@ export default function Inbox() {
       style={{scrollbarWidth: 'none'}}
     >
       <div className='w-full flex flex-row items-center justify-center flex-wrap gap-4'>
-        {mails.map(mail => <EmailPreview key={mail._id} mail={mail} onClick={handleClickEmail} />)}
+        {mails.map(mail => <EmailPreview key={mail._id} mail={mail} onClick={handleClickEmail} onDelete={handleDeleteEmail} />)}
       </div>
       <div className='mt-6 mb-4'>
         <Button
@@ -161,7 +177,7 @@ export default function Inbox() {
   )
 }
 
-function EmailPreview({ mail, onClick }: { mail: Mail, onClick: (_id: string) => void }) {
+function EmailPreview({ mail, onClick, onDelete }: { mail: Mail, onClick: (_id: string) => void, onDelete: (_id: string) => Promise<void> }) {
   const color = () => {
     let random = 0
     const min = 215
@@ -186,7 +202,23 @@ function EmailPreview({ mail, onClick }: { mail: Mail, onClick: (_id: string) =>
         <div className='text-xs text-gray-500 text-right absolute right-0 top-0'>{mail.date}</div>
       </div>
       <div className='text-xs my-2 text-gray-500 overflow-hidden overflow-ellipsis whitespace-nowrap'>来自 {mail.from}</div>
-      <div className='text-sm text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.content}</div>
+      <div className='text-sm w-[calc(100%-2.8rem)] text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.content}</div>
+      <Popconfirm
+        title='是否确认删除此邮件'
+        onConfirm={e => {
+          e?.stopPropagation()
+          return onDelete(mail._id) 
+        }}
+        onCancel={e => {
+          e?.stopPropagation()
+        }}
+        okText='删除'
+        cancelText='取消'
+      >
+        <Button className='absolute right-3 bottom-3' icon={<DeleteOutlined />} onClick={e => {
+          e.stopPropagation()
+        }} />
+      </Popconfirm>
     </div>
   )
 }
