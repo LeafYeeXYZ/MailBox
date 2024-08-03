@@ -37,5 +37,11 @@ export type InboxData = {
 } & Email
 
 export type SentData = {
-
+  from: string
+  to: string
+  subject: string
+  text: string
+  html: string
+  date: string
+  attachments?: string[]
 }

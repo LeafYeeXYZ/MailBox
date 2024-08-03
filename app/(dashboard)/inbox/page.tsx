@@ -12,6 +12,7 @@ export default function Inbox() {
   const mailsPerPage = 20
   const emailRef = useRef<string>('')
   const passwordRef = useRef<string>('')
+  const [username, setUsername] = useState<string>('')
   const router = useRouter()
   const [messageAPI, contextHolder] = message.useMessage()
 
@@ -40,7 +41,7 @@ export default function Inbox() {
   }
 
   // 当前显示的邮件
-  const loadingEmail: Mail = { _id: '', from: '', to: '', subject: '加载中...', content: '', date: '', attachments: [] }
+  const loadingEmail: Mail = { _id: '', fromName: '', from: '', to: '', subject: '加载中...', content: '', date: '', attachments: [] }
   const [email, setEmail] = useState<Mail>(loadingEmail)
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -93,6 +94,7 @@ export default function Inbox() {
   useEffect(() => {
     emailRef.current = localStorage.getItem('email') ?? sessionStorage.getItem('email') ?? ''
     passwordRef.current = localStorage.getItem('password') ?? sessionStorage.getItem('password') ?? ''
+    setUsername(localStorage.getItem('username') ?? sessionStorage.getItem('username') ?? '')
     if (!emailRef.current || !passwordRef.current) {
       messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
       setTimeout(() => {
@@ -159,8 +161,8 @@ export default function Inbox() {
       >
         <div className='w-dvw h-full absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
           <div className='w-full h-full flex flex-col sm:flex-row items-start justify-start -mt-8 px-3 gap-1 sm:flex-wrap'>
-            <div className='w-full sm:w-[49.5%] text-left text-xs text-gray-500'>来自 {email?.from}</div>
-            <div className='w-full sm:w-[49.5%] sm:text-right text-left text-xs text-gray-500'>收件人 {email?.to}</div>
+            <div className='w-full sm:w-[49.5%] text-left text-xs text-gray-500'>来自 {email?.fromName?.length ? `${email?.fromName} <${email?.from}>` : email?.from}</div>
+            <div className='w-full sm:w-[49.5%] sm:text-right text-left text-xs text-gray-500'>收件人 {`${username} <${email?.to}>`}</div>
             <div className='w-full text-left text-xs text-gray-500'>{new Date(email?.date).toLocaleString()}</div>
           </div>
           <div className='w-full h-full border-t'>
@@ -201,7 +203,7 @@ function EmailPreview({ mail, onClick, onDelete }: { mail: Mail, onClick: (_id: 
         <div className='text-sm font-bold text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.subject}</div>
         <div className='text-xs text-gray-500 text-right absolute right-0 top-0'>{mail.date}</div>
       </div>
-      <div className='text-xs my-2 text-gray-500 overflow-hidden overflow-ellipsis whitespace-nowrap'>来自 {mail.from}</div>
+      <div className='text-xs my-2 text-gray-500 overflow-hidden overflow-ellipsis whitespace-nowrap'>来自 {mail.fromName?.length ? `${mail.fromName} <${mail.from}>` : mail.from}</div>
       <div className='text-sm w-[calc(100%-2.8rem)] text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.content}</div>
       <Popconfirm
         title='是否确认删除此邮件'

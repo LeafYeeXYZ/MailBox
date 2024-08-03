@@ -11,6 +11,7 @@ const inbox = db.collection('inbox')
 export type Mail = {
   _id: string
   from: string
+  fromName: string
   to: string
   subject: string
   content: string
@@ -47,7 +48,8 @@ export async function getEmail(email: string, password: string, _id: string): Pr
   }
   return {
     _id: data._id.toString(),
-    from: data.workers.from,
+    fromName: data.from.name,
+    from: data.from.address,
     to: data.workers.to,
     subject: data.subject,
     content: data.html,
@@ -64,12 +66,13 @@ export async function getMails(email: string, password: string, limit: number, s
     return '401'
   }
   // 获取邮箱列表
-  const data = inbox.find({ 'workers.to': email }).sort({ date: -1 }).skip(skip).limit(limit).project({ text: 1, subject: 1, date: 1, workers: 1 })
+  const data = inbox.find({ 'workers.to': email }).sort({ date: -1 }).skip(skip).limit(limit).project({ text: 1, subject: 1, date: 1, workers: 1, from: 1 })
   const mails: Mail[] = []
   for await (const doc of data) {
     mails.push({
       _id: doc._id.toString(),
-      from: doc.workers.from,
+      from: doc.from.address,
+      fromName: doc.from.name,
       to: doc.workers.to,
       subject: doc.subject,
       content: doc.text.slice(0, 100),
