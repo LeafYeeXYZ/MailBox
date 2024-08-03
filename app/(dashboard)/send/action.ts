@@ -31,6 +31,9 @@ export async function sendEmail(
   const mail = await marked.parse(content)
   const css = await (await fetch('https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.css')).text()
   const html = `
+    <div class='markdown-body'>
+    ${mail}
+    </div>
     <style>
       ${css}
     </style>
@@ -42,9 +45,6 @@ export async function sendEmail(
         margin: 0 auto;
       }
     </style>
-    <div class='markdown-body'>
-      ${mail}
-    </div>
   `
   // 发送邮件
   const { error } = await resend.emails.send({
@@ -52,6 +52,7 @@ export async function sendEmail(
     to: [to],
     subject,
     html,
+    text: content
   })
   if (error) {
     return '500a'
