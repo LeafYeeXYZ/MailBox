@@ -24,6 +24,8 @@ export async function sendEmail(
   const auth = await user.findOne({ email: from, password })
   if (!auth) {
     return '401'
+  } else if (auth.role !== 'admin' && auth.role !== 'user') {
+    return '403'
   }
   // 渲染 Markdown
   const mail = await marked.parse(content)

@@ -62,6 +62,9 @@ export default function Send() {
         } else if (res === '500a' || res === '500b') {
           messageAPI.destroy()
           messageAPI.error('发送失败')
+        } else if (res === '403') {
+          messageAPI.destroy()
+          messageAPI.error('该账号无权限发送邮件')
         } else {
           messageAPI.destroy()
           messageAPI.success('发送成功')
