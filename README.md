@@ -5,7 +5,7 @@ MailBox is a web application that allows you to send and receive emails serverle
 - [x] 身份验证和用户数据存储 (MongoDB)
 - [x] 接收邮件功能 (Cloudflare Mail Workers -> Next.js -> MongoDB)
 - [x] 注册功能 (服务端注册条件控制)
-- [ ] 单条邮件阅读组件
+- [x] 单条邮件阅读组件
 - [ ] 夜间模式
 - [ ] 个人资料页面
 - [ ] 发送邮件功能 (Resend)

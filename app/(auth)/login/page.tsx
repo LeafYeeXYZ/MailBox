@@ -39,7 +39,7 @@ export default function Login() {
         messageAPI.destroy()
         messageAPI.open({
           type: 'success',
-          content: '登录成功 (2秒后自动跳转)',
+          content: '登录成功',
           duration: 2,
           key: 'success'
         })
@@ -56,7 +56,7 @@ export default function Login() {
         }
         setTimeout(() => {
           router.push('/inbox')
-        }, 2000)
+        }, 800)
       })
       // 注: Server Action 不会返回原始错误信息
       .catch(() => {

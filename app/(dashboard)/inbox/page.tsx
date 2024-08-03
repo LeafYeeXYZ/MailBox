@@ -1,9 +1,9 @@
 'use client'
 
-import { Button, message } from 'antd'
+import { Button, message, Drawer } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
-import { useState, useOptimistic, useEffect, useRef } from 'react'
-import { getMails, Mail } from './action'
+import { useState, useEffect, useRef } from 'react'
+import { getMails, Mail, getEmail } from './action'
 import { useRouter } from 'next/navigation'
 import { flushSync } from 'react-dom'
 
@@ -39,13 +39,38 @@ export default function Inbox() {
       })
   }
 
-  // 当前显示的邮件 - TODO
-  const [email, setEmail] = useState<React.ReactNode>('')
-  const [optEmail, setOptEmail] = useOptimistic(email, (state, action) => {
-    return <div><LoadingOutlined /> 加载中</div>
-  })
+  // 当前显示的邮件
+  const loadingEmail: Mail = { _id: '', from: '', to: '', subject: '加载中...', content: '', date: '', attachments: [] }
+  const [email, setEmail] = useState<Mail>(loadingEmail)
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
   const handleClickEmail = (_id: string) => {
-    messageAPI.info(`打开邮件 ${_id}`)
+    flushSync(() => {
+      setEmail(loadingEmail)
+      setLoading(true)
+      setOpen(true)
+    })
+    getEmail(emailRef.current, passwordRef.current, _id)
+      .then(res => {
+        if (res === '401') {
+          messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+          localStorage.clear()
+          sessionStorage.clear()
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+        } else if (res === '404') {
+          messageAPI.error('邮件不存在')
+          setOpen(false)
+        } else {
+          setEmail(res as Mail)
+          setLoading(false)
+        }
+      })
+      .catch(err => {
+        messageAPI.error(`获取邮件失败: ${err instanceof Error ? err.message : err}`)
+        setOpen(false)
+      })
   }
 
   // 从服务器获取初始化邮件
@@ -102,6 +127,34 @@ export default function Inbox() {
         </Button>
       </div>
       {contextHolder}
+      <Drawer
+        title={email?.subject}
+        placement='bottom'
+        closable={false}
+        onClose={() => {
+          setOpen(false)
+          setLoading(true)
+        }}
+        open={open}
+        loading={loading}
+        height={'90%'}
+        style={{ scrollbarWidth: 'none' }}
+        className='rounded-t-2xl'
+      >
+        <div className='flex flex-row items-center justify-between -mt-3'>
+          <div className='text-xs text-gray-500 text-center'>来自 {email?.from}</div>
+          <div className='text-xs text-gray-500 text-center'>收件人 {email?.to}</div>
+        </div>
+        <div className='text-xs text-gray-500 text-left mt-2'>{new Date(email?.date).toLocaleString()}</div>
+        <hr className='my-2' />
+        <div className='w-full h-[calc(100%-8rem)] absolute bottom-0 left-0 px-2'>
+          <iframe
+            srcDoc={email?.content}
+            className='w-full h-full'
+            sandbox=''
+          ></iframe>
+        </div>
+      </Drawer>
     </div>
   )
 }

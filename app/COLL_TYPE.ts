@@ -32,6 +32,8 @@ export type InboxData = {
     from: string
     to: string
   }
+  // 未来添加
+  summary?: string // AI 生成的描述
 } & Email
 
 export type SentData = {
