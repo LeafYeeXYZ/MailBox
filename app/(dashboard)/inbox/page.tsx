@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, message, Drawer } from 'antd'
-import { LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined, CaretDownFilled } from '@ant-design/icons'
 import { useState, useEffect, useRef } from 'react'
 import { getMails, Mail, getEmail } from './action'
 import { useRouter } from 'next/navigation'
@@ -130,7 +130,7 @@ export default function Inbox() {
       <Drawer
         title={email?.subject}
         placement='bottom'
-        closable={false}
+        closeIcon={<CaretDownFilled />}
         onClose={() => {
           setOpen(false)
           setLoading(true)
@@ -141,18 +141,20 @@ export default function Inbox() {
         style={{ scrollbarWidth: 'none' }}
         className='rounded-t-2xl'
       >
-        <div className='flex flex-row items-center justify-between -mt-3'>
-          <div className='text-xs text-gray-500 text-center'>来自 {email?.from}</div>
-          <div className='text-xs text-gray-500 text-center'>收件人 {email?.to}</div>
-        </div>
-        <div className='text-xs text-gray-500 text-left mt-2'>{new Date(email?.date).toLocaleString()}</div>
-        <hr className='my-2' />
-        <div className='w-full h-[calc(100%-8rem)] absolute bottom-0 left-0 px-2'>
-          <iframe
-            srcDoc={email?.content}
-            className='w-full h-full'
-            sandbox=''
-          ></iframe>
+        <div className='w-dvw h-full absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
+          <div className='w-full h-full flex flex-col sm:flex-row items-start justify-start -mt-8 px-3 gap-1 sm:flex-wrap'>
+            <div className='w-full sm:w-[49.5%] text-left text-xs text-gray-500'>来自 {email?.from}</div>
+            <div className='w-full sm:w-[49.5%] sm:text-right text-left text-xs text-gray-500'>收件人 {email?.to}</div>
+            <div className='w-full text-left text-xs text-gray-500'>{new Date(email?.date).toLocaleString()}</div>
+          </div>
+          <div className='w-full h-full border-t'>
+            <iframe
+              srcDoc={email?.content}
+              className='w-full h-full p-2'
+              style={{scrollbarWidth: 'none'}}
+              sandbox=''
+            ></iframe>
+          </div>
         </div>
       </Drawer>
     </div>
