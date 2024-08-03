@@ -86,6 +86,8 @@ bun run deploy # Deploy the workers
 4. Click on `Routing Rules`.
 5. Set `Catch All` to forward all mail to the workers you just deployed.
 
+---
+
 1. 进入你的域名的 Cloudflare 控制台
 2. 点击 `电子邮件`
 3. 点击 `邮件路由`
