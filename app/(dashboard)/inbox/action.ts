@@ -25,6 +25,8 @@ export async function deleteEmail(email: string, password: string, _id: string):
   const auth = await user.findOne({ email, password })
   if (!auth) {
     return '401'
+  } else if (auth.role !== 'admin' && auth.role !== 'user') {
+    return '403'
   }
   // 删除邮箱
   const res = await inbox.deleteOne({ _id: new ObjectId(_id) })

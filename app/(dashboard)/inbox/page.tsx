@@ -84,6 +84,8 @@ export default function Inbox() {
       }, 2000)
     } else if (res === '404') {
       messageAPI.error('邮件不存在')
+    } else if (res === '403') {
+      messageAPI.error('该账号无权限删除邮件')
     } else {
       messageAPI.success('删除成功')
       setMails(mails.filter(mail => mail._id !== _id))
