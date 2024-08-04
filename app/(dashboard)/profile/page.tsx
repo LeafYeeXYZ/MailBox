@@ -104,12 +104,13 @@ export default function Profile() {
   }
 
   return (
-    <div className='flex items-center justify-center h-full w-full overflow-hidden'>
+    <div className='flex items-start justify-center h-full w-full overflow-x-hidden overflow-y-auto'>
       {contextHolder}
       <Form
         name='profile'
         disabled={disabled}
-        className='w-full h-full max-w-xl flex flex-col items-center justify-start'
+        style={{ scrollbarWidth: 'none' }}
+        className='w-full max-w-xl flex flex-col items-center justify-start overflow-hidden'
       > 
         {/* 头像, 用户名, 邮箱 */}
         <div className='relative w-full h-32 my-8 border rounded-lg p-4 bg-gray-50 shadow-sm'>

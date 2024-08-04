@@ -32,7 +32,7 @@ export async function sendEmail(
   const css = await (await fetch('https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.css')).text()
   const html = `
     <div class='markdown-body'>
-    ${mail}
+      ${mail}
     </div>
     <style>
       ${css}
