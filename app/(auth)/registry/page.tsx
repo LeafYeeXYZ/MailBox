@@ -3,7 +3,8 @@
 import { Button, Input, Form, Flex, message } from 'antd'
 import { UserOutlined, KeyOutlined, MailOutlined, CodeOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
-import { useState, useOptimistic } from 'react'
+import { useState } from 'react'
+import { flushSync } from 'react-dom'
 import { registry } from './action'
 
 type FieldType = {
@@ -18,14 +19,10 @@ export default function Login() {
 
   const router = useRouter()
   const [messageAPI, contextHolder] = message.useMessage()
-  const [disableForm] = useState(false)
-  const [disableState, setDisableState] = useOptimistic(
-    disableForm, 
-    (_, value: boolean) => value
-  )
+  const [disableForm, setDisableForm] = useState<boolean>(false)
 
   const handleSubmit = async (values: FieldType) => {
-    setDisableState(true)
+    flushSync(() => setDisableForm(true))
     messageAPI.open({
       type: 'loading',
       content: '正在注册...',
@@ -62,6 +59,8 @@ export default function Login() {
           duration: 3,
           key: 'error'
         })
+      }).finally(() => {
+        setDisableForm(false)
       })
   }
 
@@ -72,7 +71,7 @@ export default function Login() {
         name='registry'
         className='w-11/12'
         onFinish={handleSubmit}
-        disabled={disableState}
+        disabled={disableForm}
       >
         <Form.Item>
           <p className='mb-2 text-2xl font-bold text-center'>注册</p>

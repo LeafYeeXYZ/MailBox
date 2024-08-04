@@ -21,7 +21,7 @@ export async function registry(
       return '注册码错误'
     }
     // 查询是否已存在
-    const result = await user.findOne({ email: fullEmail })
+    const result = await user.findOne({ email: fullEmail }, { projection: {} })
     if (result) {
       return '邮箱已注册'
     }

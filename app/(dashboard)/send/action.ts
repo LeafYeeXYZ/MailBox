@@ -21,7 +21,7 @@ export async function sendEmail(
   username: string
 ): Promise<boolean | string> {
   // 验证邮箱和密码
-  const auth = await user.findOne({ email: from, password })
+  const auth = await user.findOne({ email: from, password }, { projection: { role: 1 } })
   if (!auth) {
     return '401'
   } else if (auth.role !== 'admin' && auth.role !== 'user') {

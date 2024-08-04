@@ -19,6 +19,13 @@ export default function AuthLayout({ children }: Readonly<{ children: React.Reac
           {children}
         </div>
       </div>
+      <div className='absolute bottom-3 left-0 text-gray-400 text-center text-xs w-full'>
+        GPL-3.0 License | Github: <a 
+          href='https://github.com/LeafYeeXYZ/MailBox' 
+          target='_blank'
+          className='text-rose-300'
+        >LeafYeeXYZ/MailBox</a>
+      </div>
     </div>
   )
 }

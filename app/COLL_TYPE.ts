@@ -19,7 +19,7 @@ export type UserData = {
   createTime: number
   /** 更新时间 */
   updateTime: number
-  /** 头像(base64编码) */
+  /** 头像URL */
   avatar?: string
   /** 备用邮箱, 用于找回密码 */
   backupEmail?: string
@@ -32,7 +32,6 @@ export type InboxData = {
     from: string
     to: string
   }
-  // 未来添加
   summary?: string // AI 生成的描述
 } & Email
 

@@ -12,7 +12,7 @@ export async function auth(email: string, password: string): Promise<string> {
     const user = await inbox.findOne({
       email,
       password
-    })
+    }, { projection: { username: 1 } })
     if (!user) {
       throw new Error('邮箱地址或密码错误')
     }

@@ -6,14 +6,13 @@ import { MongoClient, ObjectId } from 'mongodb'
 const client = new MongoClient(process.env.MONGODB_URI!)
 const db = client.db('mailbox')
 const user = db.collection('user')
-const inbox = db.collection('inbox')
+const sent = db.collection('sent')
 
 export type Mail = {
   _id: string
-  from: string
-  fromName: string
+  to: string
   subject: string
-  content: string
+  content: string // html
   date: string
   attachments?: string[]
 }
@@ -28,7 +27,7 @@ export async function deleteEmail(email: string, password: string, _id: string):
     return '403'
   }
   // 删除邮箱
-  const res = await inbox.deleteOne({ _id: new ObjectId(_id) })
+  const res = await sent.deleteOne({ _id: new ObjectId(_id) })
   if (res.deletedCount === 0) {
     return '404'
   }
@@ -43,14 +42,13 @@ export async function getEmail(email: string, password: string, _id: string): Pr
     return '401'
   }
   // 获取邮箱
-  const data = await inbox.findOne({ _id: new ObjectId(_id) }, { projection: { from: 1, subject: 1, html: 1, date: 1, attachments: 1 } })
+  const data = await sent.findOne({ _id: new ObjectId(_id) }, { projection: { to: 1, subject: 1, html: 1, date: 1, attachments: 1 } })
   if (!data) {
     return '404'
   }
   return {
     _id: data._id.toString(),
-    fromName: data.from.name,
-    from: data.from.address,
+    to: data.to,
     subject: data.subject,
     content: data.html,
     date: data.date,
@@ -66,13 +64,12 @@ export async function getMails(email: string, password: string, limit: number, s
     return '401'
   }
   // 获取邮箱列表
-  const data = inbox.find({ 'workers.to': email }).sort({ date: -1 }).skip(skip).limit(limit).project({ text: 1, subject: 1, date: 1, from: 1 })
+  const data = sent.find({ from: email }).sort({ date: -1 }).skip(skip).limit(limit).project({ text: 1, subject: 1, date: 1, to: 1 })
   const mails: Mail[] = []
   for await (const doc of data) {
     mails.push({
       _id: doc._id.toString(),
-      from: doc.from.address,
-      fromName: doc.from.name,
+      to: doc.to,
       subject: doc.subject,
       content: doc.text.slice(0, 100),
       date: doc.date

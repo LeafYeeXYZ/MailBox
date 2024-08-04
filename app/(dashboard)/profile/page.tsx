@@ -1,14 +1,224 @@
 'use client'
 
-import { Button } from 'antd'
+import { Button, Input, Form, message, Space } from 'antd'
+import { UserOutlined, AuditOutlined, CameraOutlined, BankOutlined, FileTextOutlined, KeyOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
+import { getUser, updateUser } from './action'
+import { UserData } from '@/app/COLL_TYPE'
+import Image from 'next/image'
+import sha256 from 'crypto-js/sha256'
 
 export default function Profile() {
+
+  // 功能组件
   const router = useRouter()
+  const [messageAPI, contextHolder] = message.useMessage()
+
+  // 表单数据
+  const [form, setForm] = useState<UserData & { confirm?: string } | null>(null)
+  const [disabled, setDisabled] = useState<boolean>(false)
+
+  // 用户数据
+  const [user, setUser] = useState<UserData | null>(null)
+  useEffect(() => {
+    const email = localStorage.getItem('email') ?? sessionStorage.getItem('email') ?? ''
+    const password = localStorage.getItem('password') ?? sessionStorage.getItem('password') ?? ''
+    if (!email.length || !password.length) {
+      messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+      setTimeout(() => {
+        router.push('/login')
+      }, 2000)
+    } else {
+      getUser(email, password)
+        .then(res => {
+          if (res === '401') {
+            messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+            localStorage.clear()
+            sessionStorage.clear()
+            setTimeout(() => {
+              router.push('/login')
+            }, 2000)
+          } else {
+            setUser(res as UserData)
+            setForm(res as UserData)
+          }
+        })
+        .catch(err => {
+          messageAPI.error(`获取用户失败: ${err instanceof Error ? err.message : err}`)
+        })
+    }
+    return () => {
+      messageAPI.destroy()
+      setUser(null)
+      setForm(null)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // 提交表单
+  const handleUpdate = (field: string, value: string) => {
+    flushSync(() => setDisabled(true))
+    messageAPI.open({
+      type: 'loading',
+      content: '正在更新...',
+      duration: 0,
+      key: 'updating'
+    })
+    updateUser(user?.email ?? '', user?.password ?? '', field, value)
+      .then(res => {
+        messageAPI.destroy()
+        if (res === '200') {
+          messageAPI.success('更新成功')
+          if (field === 'password') {
+            messageAPI.info('即将跳转至登录页')
+            localStorage.clear()
+            sessionStorage.clear()
+            setTimeout(() => {
+              router.push('/login')
+            }, 800)
+          } else {
+            setTimeout(() => {
+              location.reload()
+            }, 800)
+          }
+        } else if (res === '401') {
+          messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+          localStorage.clear()
+          sessionStorage.clear()
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+        } else if (res === '403') {
+          messageAPI.error('该账号无权限更新信息')
+        } else {
+          messageAPI.error('更新失败, 未知错误')
+        }
+      }).catch(() => {
+        messageAPI.destroy()
+        messageAPI.error('更新失败, 未知错误')
+      }).finally(() => {
+        setDisabled(false)
+      })
+  }
+
   return (
-    <div className='flex flex-col items-center justify-center h-full w-full'>
-      <div className="text-center text-lg font-bold my-4">开发中...</div>
-      <Button type='primary' onClick={() => router.push('/login')}>返回登录</Button>
+    <div className='flex items-center justify-center h-full w-full overflow-hidden'>
+      {contextHolder}
+      <Form
+        name='profile'
+        disabled={disabled}
+        className='w-full h-full max-w-xl flex flex-col items-center justify-start'
+      > 
+        {/* 头像, 用户名, 邮箱 */}
+        <div className='relative w-full h-32 my-8 border rounded-lg p-4 bg-gray-50 shadow-sm'>
+          <div className='relative w-24 h-24 rounded-full overflow-hidden'>
+            <Image 
+              src={user?.avatar ?? (user?.role === 'admin' ? '/avatar.jpg' : '/avatar_public.png')}
+              alt='avatar'
+              width={100}
+              height={100}
+            />
+          </div>
+          <div className='absolute top-[2.4rem] left-36 text-lg font-bold text-gray-700'>
+            { user?.username ?? '加载中...' }
+          </div>
+          <div className='absolute top-[4.3rem] left-36 text-sm font-bold text-gray-500'>
+            { user?.email }
+          </div>
+        </div>
+
+        {/* 修改个人信息 */}
+        <p className='w-full text-left text-sm font-bold text-gray-700 my-2 pl-1'><FileTextOutlined /> 修改个人信息</p>
+        <Space.Compact className='w-full my-2'>
+          <Input 
+            addonBefore={<span><UserOutlined /> 用户名</span>}
+            name='username'
+            placeholder={`当前: ${user?.username ?? '未设置'}`}
+            onChange={e => setForm(form => ({ ...form, username: e.target.value } as UserData))}
+          />
+          <Button 
+            onClick={() => {
+              // 检查用户名长度
+              if ((form?.username.length ?? 0) > 20 || /\s/.test(form?.username ?? '') || !form?.username.length) {
+                messageAPI.error('用户名最长20个字符且不能有空格')
+                return
+              }
+              handleUpdate('username', form?.username ?? '')
+            }}
+            type='default'
+            disabled={user?.username === form?.username || !form?.username.length || disabled}
+          >修改</Button>
+        </Space.Compact>
+        <Space.Compact className='w-full my-2'>
+          <Input 
+            addonBefore={<span><CameraOutlined /> 头像链接</span>}
+            name='avatar'
+            placeholder={`当前: ${user?.avatar ?? '未设置 (推荐使用Gravatar)'}`}
+            onChange={e => setForm(form => ({ ...form, avatar: e.target.value } as UserData))}
+          />
+          <Button 
+            onClick={() => {
+              // 检查链接格式
+              if (!/^https?:\/\//.test(form?.avatar ?? '')) {
+                messageAPI.error('头像链接格式错误')
+                return
+              }
+              handleUpdate('avatar', form?.avatar ?? '')
+            }}
+            type='default'
+            disabled={user?.avatar === form?.avatar || !form?.avatar?.length || disabled}
+          >修改</Button>
+        </Space.Compact>
+        <Space.Compact className='w-full my-2'>
+          <Input 
+            addonBefore={<span><BankOutlined /> 密保邮箱</span>}
+            name='signature'
+            placeholder={`当前: ${user?.backupEmail ?? '未设置'}`}
+            onChange={e => setForm(form => ({ ...form, backupEmail: e.target.value } as UserData))}
+          />
+          <Button 
+            onClick={() => {
+              // 检查邮箱格式
+              if (!/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(form?.backupEmail ?? '')) {
+                messageAPI.error('密保邮箱格式错误')
+                return
+              }
+              handleUpdate('backupEmail', form?.backupEmail ?? '')
+            }}
+            type='default'
+            disabled={user?.backupEmail === form?.backupEmail || !form?.backupEmail?.length || disabled}
+          >修改</Button>
+        </Space.Compact>
+
+        {/* 重置密码 */}
+        <p className='w-full text-left text-sm font-bold text-gray-700 my-2 pl-1'><AuditOutlined /> 重置密码</p>
+        <Space.Compact className='w-full my-2'>
+          <Input 
+            addonBefore={<span><KeyOutlined /> 新密码</span>}
+            name='password'
+            placeholder='请输入新密码'
+            type='password'
+            onChange={e => setForm(form => ({ ...form, password: e.target.value } as UserData))}
+          />
+        </Space.Compact>
+        <Space.Compact className='w-full my-2'>
+          <Input 
+            addonBefore={<span><KeyOutlined /> 确认密码</span>}
+            name='confirm'
+            placeholder='请再次输入'
+            type='password'
+            onChange={e => setForm(form => ({ ...form, confirm: e.target.value } as UserData))}
+          />
+        </Space.Compact>
+        <Button 
+          onClick={() => handleUpdate('password', sha256(form?.password ?? '').toString())}
+          type='default'
+          className='w-full my-2'
+          disabled={form?.password !== form?.confirm || !form?.password?.length || !form?.confirm?.length || disabled}
+        >修改密码</Button>
+      </Form>
     </div>
   )
 }

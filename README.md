@@ -1,11 +1,7 @@
-> This project was still in development, but basic functions have been implemented. You can deploy it to your own server and use it with your custom domain. If you have any questions, please feel free to open an issue.
-
-> 该项目仍在开发中，但基本功能已经实现. 你可以将其部署到你自己的服务器并使用自定义域名. 如果你有任何问题，请随时提出 issue
-
 # MailBox
 MailBox is a web application that allows you to send and receive emails serverlessly and costlessly with your custom domain.
 
-MailBox 是一个允许你使用自定义域名进行免费邮件收发的 Web 应用
+MailBox 是一个允许你使用自定义域名进行免费邮件收发的 Serverless 网页应用
 
 ![](./README.png)
 
@@ -104,9 +100,9 @@ bun run deploy # Deploy the workers
 - [x] 单条邮件阅读组件
 - [x] 发送邮件功能 (Resend)
 - [x] 支持 Markdown 写邮件 (Marked)
-- [ ] 个人资料页面 (记得游客账户不能修改)
+- [x] 已发送邮件页面
+- [x] 个人资料页面 (记得游客账户不能修改)
 - [ ] 夜间模式
-- [ ] 已发送邮件页面
 - [ ] 找回密码功能 (向备用邮箱发送验证码)
 - [ ] AI 总结邮件内容生成邮件摘要 (Cloudflare Workers AI)
 - [ ] 附件支持
