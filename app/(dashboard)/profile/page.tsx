@@ -113,7 +113,7 @@ export default function Profile() {
         className='w-full max-w-xl flex flex-col items-center justify-start overflow-hidden'
       > 
         {/* 头像, 用户名, 邮箱 */}
-        <div className='relative w-full h-32 my-8 border rounded-lg p-4 bg-gray-50 shadow-sm'>
+        <div className='relative w-full h-32 my-8 border rounded-lg py-[0.95rem] pl-5 bg-gray-50 shadow-sm'>
           <div className='relative w-24 h-24 rounded-full overflow-hidden'>
             <Image 
               src={user?.avatar ?? (user?.role === 'admin' ? '/avatar.jpg' : '/avatar_public.png')}
@@ -122,10 +122,10 @@ export default function Profile() {
               height={100}
             />
           </div>
-          <div className='absolute top-[2.4rem] left-36 text-lg font-bold text-gray-700'>
+          <div className='absolute w-1/2 top-[2.4rem] left-[9.1rem] text-lg font-bold text-gray-700 overflow-hidden text-ellipsis text-nowrap'>
             { user?.username ?? '加载中...' }
           </div>
-          <div className='absolute top-[4.3rem] left-36 text-sm font-bold text-gray-500'>
+          <div className='absolute w-1/2 top-[4.3rem] left-[9.2rem] text-sm font-bold text-gray-500 overflow-hidden text-ellipsis text-nowrap'>
             { user?.email }
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function Profile() {
           <Input 
             addonBefore={<span><CameraOutlined /> 头像链接</span>}
             name='avatar'
-            placeholder={`当前: ${user?.avatar ?? '未设置 (推荐使用Gravatar)'}`}
+            placeholder={`当前: ${user?.avatar ?? '未设置 (仅支持Gravatar)'}`}
             onChange={e => setForm(form => ({ ...form, avatar: e.target.value } as UserData))}
           />
           <Button 
