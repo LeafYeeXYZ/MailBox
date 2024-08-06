@@ -88,11 +88,13 @@ export default function Send() {
         name='send'
         form={form}
         onFinish={handleSubmit}
-        className='w-full h-full grid grid-rows-[13.5rem,calc(100%-12.5rem)] md:grid-rows-[5.8rem,calc(100%-5.8rem)] md:gap-[1.1rem]'
+        className='w-full h-full grid grid-rows-[11.5rem,calc(100%-10.5rem)] md:grid-rows-[5rem,calc(100%-5rem)] md:gap-[1.1rem]'
         disabled={disableForm}
       >
-        <div className='w-full md:grid md:grid-cols-2 md:grid-rows-2 md:gap-4'>
-          <Form.Item>
+        <div className='w-full md:grid md:grid-cols-2 md:grid-rows-[2rem,2rem] md:gap-[0.8rem]'>
+          <Form.Item
+            className='mb-[0.8rem]'
+          >
             <Input
               className='w-full'
               disabled
@@ -101,6 +103,7 @@ export default function Send() {
             />
           </Form.Item>
           <Form.Item
+            className='mb-[0.8rem]'
             name='to'
             rules={[
               { required: true, message: '请输入收件人' },
@@ -122,6 +125,7 @@ export default function Send() {
             />
           </Form.Item>
           <Form.Item
+            className='mb-[0.8rem]'
             name='subject'
             rules={[{ required: true, message: '请输入主题' }]}
           >
