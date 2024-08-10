@@ -80,3 +80,15 @@ export async function getMails(email: string, password: string, limit: number, s
   }
   return mails
 }
+
+// 判断是否有新邮件
+export async function hasNewEmail(email: string, password: string, localDate: string): Promise<boolean | string> {
+  // 验证邮箱和密码
+  const auth = await user.findOne({ email, password }, { projection: {} })
+  if (!auth) {
+    return '401'
+  }
+  // 获取邮箱列表
+  const data = await inbox.findOne({ 'workers.to': email, date: { $gt: localDate } }, { projection: {} })
+  return Boolean(data)
+}

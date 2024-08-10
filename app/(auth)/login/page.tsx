@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useOptimistic } from 'react'
 import { auth } from './action'
 import sha256 from 'crypto-js/sha256'
+import { clear } from 'idb-keyval'
 
 type FieldType = {
   email: string
@@ -73,6 +74,8 @@ export default function Login() {
   useEffect(() => {
     if (localStorage.getItem('email') && localStorage.getItem('password')) {
       router.push('/inbox')
+    } else {
+      clear() // Promise<void>
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

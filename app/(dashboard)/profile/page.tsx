@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Input, Form, message, Space } from 'antd'
-import { UserOutlined, AuditOutlined, CameraOutlined, BankOutlined, FileTextOutlined, KeyOutlined } from '@ant-design/icons'
+import { UserOutlined, AuditOutlined, CameraOutlined, BankOutlined, FileTextOutlined, KeyOutlined, CodeOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { flushSync } from 'react-dom'
@@ -9,6 +9,7 @@ import { getUser, updateUser } from './action'
 import { UserData } from '@/app/COLL_TYPE'
 import Image from 'next/image'
 import sha256 from 'crypto-js/sha256'
+import { clear, set, get, del } from 'idb-keyval'
 
 export default function Profile() {
 
@@ -30,25 +31,31 @@ export default function Profile() {
       setTimeout(() => {
         router.push('/login')
       }, 2000)
-    } else {
-      getUser(email, password)
-        .then(res => {
-          if (res === '401') {
-            messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
-            localStorage.clear()
-            sessionStorage.clear()
-            setTimeout(() => {
-              router.push('/login')
-            }, 2000)
-          } else {
-            setUser(res as UserData)
-            setForm(res as UserData)
-          }
-        })
-        .catch(err => {
-          messageAPI.error(`获取用户失败: ${err instanceof Error ? err.message : err}`)
-        })
+      return () => messageAPI.destroy()
     }
+    get<UserData>('user')
+    // 先从缓存中获取用户信息
+    .then(res => {
+      return res ?? getUser(email, password)
+    })
+    // 缓存中没有再从服务器获取
+    .then(res => {
+      if (res === '401') {
+        messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+        localStorage.clear()
+        sessionStorage.clear()
+        setTimeout(() => {
+          router.push('/login')
+        }, 2000)
+      } else {
+        setUser(res as UserData)
+        setForm(res as UserData)
+        set('user', res as UserData) // Promise<void>
+      }
+    })
+    .catch(err => {
+      messageAPI.error(`获取用户失败: ${err instanceof Error ? err.message : err}`)
+    })
     return () => {
       messageAPI.destroy()
       setUser(null)
@@ -71,18 +78,21 @@ export default function Profile() {
         messageAPI.destroy()
         if (res === '200') {
           messageAPI.success('更新成功')
-          if (field === 'password') {
-            messageAPI.info('即将跳转至登录页')
-            localStorage.clear()
-            sessionStorage.clear()
-            setTimeout(() => {
-              router.push('/login')
-            }, 800)
-          } else {
-            setTimeout(() => {
-              location.reload()
-            }, 800)
-          }
+          // 清除缓存
+          del('user').then(() => {
+            if (field === 'password') {
+              messageAPI.info('即将跳转至登录页')
+              localStorage.clear()
+              sessionStorage.clear()
+              setTimeout(() => {
+                router.push('/login')
+              }, 800)
+            } else {
+              setTimeout(() => {
+                location.reload()
+              }, 800)
+            }
+          })
         } else if (res === '401') {
           messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
           localStorage.clear()
@@ -219,6 +229,20 @@ export default function Profile() {
           className='w-full my-2'
           disabled={form?.password !== form?.confirm || !form?.password?.length || !form?.confirm?.length || disabled}
         >修改密码</Button>
+        {/* 清除缓存 */}
+        <p className='w-full text-left text-sm font-bold text-gray-700 my-2 pl-1'><CodeOutlined /> 高级设置</p>
+        <Button 
+          onClick={async () => {
+            flushSync(() => setDisabled(true))
+            await clear()
+            messageAPI.success('清除成功')
+            setTimeout(() => {
+              location.reload()
+            }, 800)
+          }}
+          type='default'
+          className='w-full my-2'
+        >清除缓存</Button>
       </Form>
     </div>
   )

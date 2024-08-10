@@ -2,10 +2,11 @@
 
 import { Button, message, Drawer, Popconfirm } from 'antd'
 import { LoadingOutlined, CaretDownFilled, DeleteOutlined } from '@ant-design/icons'
-import { useState, useEffect, useRef } from 'react'
-import { getMails, Mail, getEmail, deleteEmail } from './action'
+import { useState, useEffect } from 'react'
+import { getMails, Mail, getEmail, deleteEmail, hasNewEmail } from './action'
 import { useRouter } from 'next/navigation'
 import { flushSync } from 'react-dom'
+import { get, set, del } from 'idb-keyval'
 
 export default function Inbox() {
   
@@ -89,6 +90,7 @@ export default function Inbox() {
     } else {
       messageAPI.success('删除成功')
       setMails(mails.filter(mail => mail._id !== _id))
+      del('inbox') // Promise<void>
     }
   }
 
@@ -97,32 +99,95 @@ export default function Inbox() {
     const email = localStorage.getItem('email') ?? sessionStorage.getItem('email') ?? ''
     const password = localStorage.getItem('password') ?? sessionStorage.getItem('password') ?? ''
     const username = localStorage.getItem('username') ?? sessionStorage.getItem('username') ?? ''
-    setUseremail(email)
-    setPassword(password)
-    setUsername(username)
     if (!email.length || !password.length) {
       messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
       setTimeout(() => {
         router.push('/login')
       }, 2000)
+      return () => messageAPI.destroy()
+    }
+    const localDate = localStorage.getItem('inboxDate')
+    let hasNew: boolean
+    if (localDate) {
+      // 判断是否有新邮件
+      hasNewEmail(email, password, localDate)
+      .then(res => {
+        if (res === '401') {
+          messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+          localStorage.clear()
+          sessionStorage.clear()
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+          return 'continue'
+        } else if (typeof res === 'boolean') {
+          hasNew = res
+          return get('inbox')
+        } else {
+          throw new Error(res)
+        }
+      })
+      // 从缓存获取邮件
+      .then(res => {
+        if (res === 'continue') {
+          return 'continue'
+        } else if (res && !hasNew) {
+          return res as Mail[]
+        } else {
+          return getMails(email, password, mailsPerPage, 0)
+        }
+      })
+      // 从服务器获取邮件
+      .then(res => {
+        if (res === '401') {
+          messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+          localStorage.clear()
+          sessionStorage.clear()
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+          return 'continue'
+        } else if (res === 'continue') {
+          return 'continue'
+        } else {
+          setMails(res as Mail[])
+          setBtn(res.length === mailsPerPage ? 'loaded' : 'null')
+          setUseremail(email)
+          setPassword(password)
+          setUsername(username)
+          set('inbox', res as Mail[]) // Promise<void>
+          // 更新缓存时间
+          localStorage.setItem('inboxDate', new Date().toISOString())
+        }
+      })
+      .catch(err => {
+        messageAPI.error(`获取邮件失败: ${err instanceof Error ? err.message : err}`)
+      })
     } else {
+      // 直接从服务器获取邮件
       getMails(email, password, mailsPerPage, 0)
-        .then(res => {
-          if (res === '401') {
-            messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
-            localStorage.clear()
-            sessionStorage.clear()
-            setTimeout(() => {
-              router.push('/login')
-            }, 2000)
-          } else {
-            setMails(res as Mail[])
-            setBtn(res.length === mailsPerPage ? 'loaded' : 'null')
-          }
-        })
-        .catch(err => {
-          messageAPI.error(`获取邮件失败: ${err instanceof Error ? err.message : err}`)
-        })
+      .then(res => {
+        if (res === '401') {
+          messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+          localStorage.clear()
+          sessionStorage.clear()
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+        } else {
+          setMails(res as Mail[])
+          setBtn(res.length === mailsPerPage ? 'loaded' : 'null')
+          setUseremail(email)
+          setPassword(password)
+          setUsername(username)
+          set('inbox', res as Mail[]) // Promise<void>
+          // 更新缓存时间
+          localStorage.setItem('inboxDate', new Date().toISOString())
+        }
+      })
+      .catch(err => {
+        messageAPI.error(`获取邮件失败: ${err instanceof Error ? err.message : err}`)
+      })
     }
     return () => {
       messageAPI.destroy()
@@ -164,7 +229,7 @@ export default function Inbox() {
         style={{ scrollbarWidth: 'none' }}
         className='rounded-t-2xl'
       >
-        <div className='w-dvw h-full absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
+        <div className='w-dvw h-[calc(100%-5rem)] absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
           <div className='w-full h-full flex flex-col sm:flex-row items-start justify-start -mt-8 px-3 gap-1 sm:flex-wrap'>
             <div className='w-full sm:w-[49.5%] text-left text-xs text-gray-500'>来自 {email?.fromName?.length ? `${email?.fromName} <${email?.from}>` : email?.from}</div>
             <div className='w-full sm:w-[49.5%] sm:text-right text-left text-xs text-gray-500'>收件人 {`${username} <${useremail}>`}</div>
@@ -173,7 +238,7 @@ export default function Inbox() {
           <div className='w-full h-full border-t'>
             <iframe
               srcDoc={email?.content}
-              className='w-full h-full p-2'
+              className='w-full h-full'
               style={{scrollbarWidth: 'none'}}
               sandbox=''
             ></iframe>

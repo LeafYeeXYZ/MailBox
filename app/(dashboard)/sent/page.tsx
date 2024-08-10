@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { getMails, Mail, getEmail, deleteEmail } from './action'
 import { useRouter } from 'next/navigation'
 import { flushSync } from 'react-dom'
+import { set, get, del } from 'idb-keyval'
 
 export default function Sent() {
   
@@ -89,6 +90,7 @@ export default function Sent() {
     } else {
       messageAPI.success('删除成功')
       setMails(mails.filter(mail => mail._id !== _id))
+      del('sent') // Promise<void>
     }
   }
 
@@ -105,25 +107,31 @@ export default function Sent() {
       setTimeout(() => {
         router.push('/login')
       }, 2000)
-    } else {
-      getMails(email, password, mailsPerPage, 0)
-        .then(res => {
-          if (res === '401') {
-            messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
-            localStorage.clear()
-            sessionStorage.clear()
-            setTimeout(() => {
-              router.push('/login')
-            }, 2000)
-          } else {
-            setMails(res as Mail[])
-            setBtn(res.length === mailsPerPage ? 'loaded' : 'null')
-          }
-        })
-        .catch(err => {
-          messageAPI.error(`获取邮件失败: ${err instanceof Error ? err.message : err}`)
-        })
+      return () => messageAPI.destroy()
     }
+    get('sent')
+    // 先从缓存中获取邮件
+    .then(res => {
+      return res ?? getMails(email, password, mailsPerPage, 0)
+    })
+    // 缓存中没有再从服务器获取
+    .then(res => {
+      if (res === '401') {
+        messageAPI.error('登陆失效 (2秒后自动跳转至登录页)')
+        localStorage.clear()
+        sessionStorage.clear()
+        setTimeout(() => {
+          router.push('/login')
+        }, 2000)
+      } else {
+        setMails(res as Mail[])
+        setBtn(res.length === mailsPerPage ? 'loaded' : 'null')
+        set('sent', res as Mail[]) // Promise<void>
+      }
+    })
+    .catch(err => {
+      messageAPI.error(`获取邮件失败: ${err instanceof Error ? err.message : err}`)
+    })
     return () => {
       messageAPI.destroy()
       setMails([])
@@ -164,7 +172,7 @@ export default function Sent() {
         style={{ scrollbarWidth: 'none' }}
         className='rounded-t-2xl'
       >
-        <div className='w-dvw h-full absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
+        <div className='w-dvw h-[calc(100%-5rem)] absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
           <div className='w-full h-full flex flex-col sm:flex-row items-start justify-start -mt-8 px-3 gap-1 sm:flex-wrap'>
             <div className='w-full sm:w-[49.5%] text-left text-xs text-gray-500'>发给 {email?.to}</div>
             <div className='w-full sm:w-[49.5%] sm:text-right text-left text-xs text-gray-500'>发件人 {`${username} <${useremail}>`}</div>
@@ -173,7 +181,7 @@ export default function Sent() {
           <div className='w-full h-full border-t'>
             <iframe
               srcDoc={email?.content}
-              className='w-full h-full p-2'
+              className='w-full h-full'
               style={{scrollbarWidth: 'none'}}
               sandbox=''
             ></iframe>

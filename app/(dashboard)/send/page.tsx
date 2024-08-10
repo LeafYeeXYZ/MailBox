@@ -10,6 +10,7 @@ import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import 'github-markdown-css/github-markdown.css'
+import { del } from 'idb-keyval'
 
 type FieldType = {
   to: string
@@ -70,6 +71,7 @@ export default function Send() {
           messageAPI.success('发送成功')
           form.resetFields()
           setContent('')
+          del('sent') // Promise<void>
         }
       })
       .catch(err => {
@@ -171,7 +173,7 @@ export default function Send() {
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
               >
-                {content + '<br /><br />'}
+                {content + '\n<br />'}
               </Markdown>
             </div>
             <Form.Item
