@@ -107,3 +107,4 @@ bun run deploy # Deploy the workers
 - [ ] AI 总结邮件内容生成邮件摘要 (Cloudflare Workers AI)
 - [ ] 附件支持
 - [ ] 邮件收藏
+- [ ] 邮件提醒 (Resend Webhook -> Cloudflare Queues -> Device)
