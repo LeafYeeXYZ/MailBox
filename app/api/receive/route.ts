@@ -15,7 +15,12 @@ export async function POST(req: Request): Promise<Response> {
   const data = await PostalMime.parse(mail)
   // 如果没有 text, 将 html 转换为 text 并移除所有标签
   if (!data.text) {
-    data.text = data.html?.replace(/<br>/g, '\n').replace(/<br \/>/g, '\n').replace(/<[^>]+>/g, '')
+    data.text = data.html
+      ?.replace(/<br>/g, '\n')
+      .replace(/<br \/>/g, '\n')
+      .replace(/<style[^>]*>.*?<\/style>/g, '')
+      .replace(/<script[^>]*>.*?<\/script>/g, '')
+      .replace(/<[^>]+>/g, '')
   }
   // 生产 AI 摘要
   // const summary = ''
