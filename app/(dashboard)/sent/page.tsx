@@ -62,7 +62,12 @@ export default function Sent() {
             router.push('/login')
           }, 2000)
         } else if (res === '404') {
-          messageAPI.error('邮件不存在')
+          messageAPI.error('缓存过期 (2秒后自动刷新)')
+          localStorage.clear()
+          sessionStorage.clear()
+          setTimeout(() => {
+            router.refresh()
+          }, 2000)
           setOpen(false)
         } else {
           setEmail(res as Mail)
@@ -84,7 +89,12 @@ export default function Sent() {
         router.push('/login')
       }, 2000)
     } else if (res === '404') {
-      messageAPI.error('邮件不存在')
+      messageAPI.error('缓存过期 (2秒后自动刷新)')
+      localStorage.clear()
+      sessionStorage.clear()
+      setTimeout(() => {
+        router.refresh()
+      }, 2000)
     } else if (res === '403') {
       messageAPI.error('该账号无权限删除邮件')
     } else {
