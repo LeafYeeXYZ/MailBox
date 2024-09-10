@@ -62,12 +62,11 @@ export default function Inbox() {
             router.push('/login')
           }, 2000)
         } else if (res === '404') {
-          messageAPI.error('缓存过期 (2秒后自动刷新)')
-          localStorage.clear()
-          sessionStorage.clear()
+          messageAPI.error('缓存过期 (1秒后自动刷新)')
+          del('inbox') // Promise<void>
           setTimeout(() => {
-            router.refresh()
-          }, 2000)
+            location.reload()
+          }, 1000)
           setOpen(false)
         } else {
           setEmail(res as Mail)
@@ -89,12 +88,11 @@ export default function Inbox() {
         router.push('/login')
       }, 2000)
     } else if (res === '404') {
-      messageAPI.error('缓存过期 (2秒后自动刷新)')
-      localStorage.clear()
-      sessionStorage.clear()
+      messageAPI.error('缓存过期 (1秒后自动刷新)')
+      del('inbox') // Promise<void>
       setTimeout(() => {
-        router.refresh()
-      }, 2000)
+        location.reload()
+      }, 1000)
     } else if (res === '403') {
       messageAPI.error('该账号无权限删除邮件')
     } else {
