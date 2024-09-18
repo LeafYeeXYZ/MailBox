@@ -24,6 +24,12 @@ export async function POST(req: Request): Promise<Response> {
   }
   // 生产 AI 摘要
   // const summary = ''
+  // 如果没有 html, 将 text 转换为 html
+  if (!data.html) {
+    data.html = `
+      <html><body><div>${data.text}</div></body></html>
+    `
+  }
   // 将邮件数据插入到收件箱
   await inbox.insertOne({ ...data, workers: { from, to } })
   return new Response('OK')
