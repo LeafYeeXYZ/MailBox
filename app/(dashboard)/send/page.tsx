@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Form, message, Radio } from 'antd'
+import { Button, Input, Form, message, Radio, ConfigProvider, ThemeConfig } from 'antd'
 import { UserOutlined, CommentOutlined, EditOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import 'github-markdown-css/github-markdown.css'
 import { del } from 'idb-keyval'
+import { darkTheme } from '@/app/config'
 
 type FieldType = {
   to: string
@@ -83,115 +84,128 @@ export default function Send() {
       })
   }
 
+  // 控制黑暗模式
+  const [themeConfig, setThemeConfig] = useState<ThemeConfig>({})
+  useEffect(() => {
+    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    if (isDarkMode) {
+      setThemeConfig(darkTheme)
+    }
+  }, [])
+  
   return (
-    <div className='flex overflow-hidden flex-col items-center justify-center h-full w-full'>
-      {contextHolder}
-      <Form<FieldType>
-        name='send'
-        form={form}
-        onFinish={handleSubmit}
-        className='w-full h-full grid grid-rows-[11.5rem,calc(100%-10.5rem)] md:grid-rows-[5rem,calc(100%-5rem)] md:gap-[1.1rem]'
-        disabled={disableForm}
-      >
-        <div className='w-full md:grid md:grid-cols-2 md:grid-rows-[2rem,2rem] md:gap-[0.8rem]'>
-          <Form.Item
-            className='mb-[0.8rem]'
-          >
-            <Input
-              className='w-full'
-              disabled
-              placeholder={`${username} <${email}>`}
-              addonBefore={<span className='text-gray-400'><UserOutlined /> 发件人</span>}
-            />
-          </Form.Item>
-          <Form.Item
-            className='mb-[0.8rem]'
-            name='to'
-            rules={[
-              { required: true, message: '请输入收件人' },
-              { type: 'email', message: '请输入正确的邮箱地址' },
-              () => ({
-                validator(_, value) {
-                  if (value === email) {
-                    return Promise.reject('收件人和发件人不能相同')
-                  }
-                  return Promise.resolve()
-                }
-              })
-            ]}
-          >
-            <Input
-              className='w-full'
-              addonBefore={<span className='text-gray-400'><CommentOutlined /> 收件人</span>}
-              placeholder='请输入收件人'
-            />
-          </Form.Item>
-          <Form.Item
-            className='mb-[0.8rem]'
-            name='subject'
-            rules={[{ required: true, message: '请输入主题' }]}
-          >
-            <Input
-              className='w-full'
-              addonBefore={<span className='text-gray-400'><EditOutlined /> 主题</span>}
-              placeholder='请输入主题'
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              htmlType='submit'
-              className='w-full'
-            >
-              发送
-            </Button>
-          </Form.Item>
-        </div>
-        <div className='w-full h-full grid grid-rows-[2.4rem,calc(100%-3.5rem)]'>
-          <Form.Item
-            className='mx-auto'
-          >
-            <Radio.Group
-              defaultValue='edit'
-              size='small'
-              buttonStyle='outline'
-              onChange={e => setPreview(e.target.value === 'preview')}
-            >
-              <Radio.Button className='text-xs' value='edit'>编辑</Radio.Button>
-              <Radio.Button className='text-xs' value='preview'>预览</Radio.Button>
-            </Radio.Group>
-          </Form.Item>
-          <div 
-            style={{ scrollbarWidth: 'none' }}
-            className='w-full h-full rounded-lg border overflow-x-hidden overflow-y-auto'
-          >
-            <div 
-              className='w-full h-full'
-              style={{ display: preview ? 'block' : 'none' }}
-            >
-              <Markdown
-                className='markdown-body w-full h-full py-2 px-3'
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw]}
-              >
-                {content + '\n<br />'}
-              </Markdown>
-            </div>
+    <ConfigProvider
+      theme={themeConfig}
+    >
+      <div className='flex overflow-hidden flex-col items-center justify-center h-full w-full'>
+        {contextHolder}
+        <Form<FieldType>
+          name='send'
+          form={form}
+          onFinish={handleSubmit}
+          className='w-full h-full grid grid-rows-[11.5rem,calc(100%-10.5rem)] md:grid-rows-[5rem,calc(100%-5rem)] md:gap-[1.1rem]'
+          disabled={disableForm}
+        >
+          <div className='w-full md:grid md:grid-cols-2 md:grid-rows-[2rem,2rem] md:gap-[0.8rem]'>
             <Form.Item
-              name='content'
-              rules={[{ required: true, message: '请输入邮件内容' }]}
-              className='w-full h-full'
-              style={{ display: preview ? 'none' : 'block' }}
+              className='mb-[0.8rem]'
             >
-              <Input.TextArea
-                placeholder='请输入邮件内容 (支持 Markdown 和 HTML)'
-                autoSize={{ minRows: 5 }}
-                className='w-full h-full border-none py-2 focus:ring-0'
-                onChange={e => setContent(e.target.value)}
+              <Input
+                className='w-full'
+                disabled
+                placeholder={`${username} <${email}>`}
+                addonBefore={<span className='text-gray-400'><UserOutlined /> 发件人</span>}
               />
             </Form.Item>
+            <Form.Item
+              className='mb-[0.8rem]'
+              name='to'
+              rules={[
+                { required: true, message: '请输入收件人' },
+                { type: 'email', message: '请输入正确的邮箱地址' },
+                () => ({
+                  validator(_, value) {
+                    if (value === email) {
+                      return Promise.reject('收件人和发件人不能相同')
+                    }
+                    return Promise.resolve()
+                  }
+                })
+              ]}
+            >
+              <Input
+                className='w-full'
+                addonBefore={<span className='text-gray-400'><CommentOutlined /> 收件人</span>}
+                placeholder='请输入收件人'
+              />
+            </Form.Item>
+            <Form.Item
+              className='mb-[0.8rem]'
+              name='subject'
+              rules={[{ required: true, message: '请输入主题' }]}
+            >
+              <Input
+                className='w-full'
+                addonBefore={<span className='text-gray-400'><EditOutlined /> 主题</span>}
+                placeholder='请输入主题'
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                htmlType='submit'
+                className='w-full'
+              >
+                发送
+              </Button>
+            </Form.Item>
           </div>
-        </div>
-      </Form>
-    </div>
+          <div className='w-full h-full grid grid-rows-[2.4rem,calc(100%-3.5rem)]'>
+            <Form.Item
+              className='mx-auto'
+            >
+              <Radio.Group
+                defaultValue='edit'
+                size='small'
+                buttonStyle='outline'
+                onChange={e => setPreview(e.target.value === 'preview')}
+              >
+                <Radio.Button className='text-xs' value='edit'>编辑</Radio.Button>
+                <Radio.Button className='text-xs' value='preview'>预览</Radio.Button>
+              </Radio.Group>
+            </Form.Item>
+            <div 
+              style={{ scrollbarWidth: 'none' }}
+              className='w-full h-full rounded-lg border overflow-x-hidden overflow-y-auto dark:border-black'
+            >
+              <div 
+                className='w-full h-full'
+                style={{ display: preview ? 'block' : 'none' }}
+              >
+                <Markdown
+                  className='markdown-body w-full h-full py-2 px-3'
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                >
+                  {content + '\n<br />'}
+                </Markdown>
+              </div>
+              <Form.Item
+                name='content'
+                rules={[{ required: true, message: '请输入邮件内容' }]}
+                className='w-full h-full'
+                style={{ display: preview ? 'none' : 'block' }}
+              >
+                <Input.TextArea
+                  placeholder='请输入邮件内容 (支持 Markdown 和 HTML)'
+                  autoSize={{ minRows: 5 }}
+                  className='w-full h-full border-none py-2 focus:ring-0'
+                  onChange={e => setContent(e.target.value)}
+                />
+              </Form.Item>
+            </div>
+          </div>
+        </Form>
+      </div>
+    </ConfigProvider>
   )
 }

@@ -1,11 +1,12 @@
 'use client'
 
-import { Button, Input, Form, Flex, message } from 'antd'
+import { Button, Input, Form, Flex, message, ConfigProvider, ThemeConfig } from 'antd'
 import { UserOutlined, KeyOutlined, MailOutlined, CodeOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { flushSync } from 'react-dom'
 import { registry } from './action'
+import { darkTheme } from '@/app/config'
 
 type FieldType = {
   username: string
@@ -64,91 +65,104 @@ export default function Login() {
       })
   }
 
+  // 控制黑暗模式
+  const [themeConfig, setThemeConfig] = useState<ThemeConfig>({})
+  useEffect(() => {
+    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    if (isDarkMode) {
+      setThemeConfig(darkTheme)
+    }
+  }, [])
+  
   return (
-    <div className='relative w-full h-full flex flex-col items-center justify-center'>
-      {contextHolder}
-      <Form<FieldType>
-        name='registry'
-        className='w-11/12'
-        onFinish={handleSubmit}
-        disabled={disableForm}
-      >
-        <Form.Item>
-          <p className='mb-2 text-2xl font-bold text-center'>注册</p>
-        </Form.Item>
-
-        <Form.Item
-          name='username'
-          rules={[{ required: true, message: '请输入用户名' },
-            () => ({
-              validator(_, value) {
-                if (!value || value.length <= 20 && !/\s/.test(value)) {
-                  return Promise.resolve()
-                }
-                return Promise.reject(new Error('用户名最长20个字符且不能有空格'))
-              },
-            })
-          ]}
+    <ConfigProvider
+      theme={themeConfig}
+    >
+      <div className='relative w-full h-full flex flex-col items-center justify-center'>
+        {contextHolder}
+        <Form<FieldType>
+          name='registry'
+          className='w-11/12'
+          onFinish={handleSubmit}
+          disabled={disableForm}
         >
-          <Input prefix={<UserOutlined />} placeholder='用户名 (支持中文)' />
-        </Form.Item>
-
-        <Form.Item
-          name='email'
-          rules={[{ required: true, message: '请输入邮箱地址', },
-            () => ({
-              validator(_, value) {
-                if (!value || /^[a-z0-9]{1,20}$/.test(value)) {
-                  return Promise.resolve()
-                }
-                return Promise.reject(new Error('请输入20个字符以内的小写字母或数字'))
-              },
-            })
-          ]}
-        >
-          <Input addonAfter={`@${process.env.NEXT_PUBLIC_MAIL_SERVER}`} prefix={<MailOutlined />} placeholder='邮箱地址' type='text' />
-        </Form.Item>
-
-        <Form.Item
-          name='password'
-          rules={[{ required: true, message: '请输入密码' }]}
-        >
-          <Input prefix={<KeyOutlined />} type="password" placeholder='密码' />
-        </Form.Item>
-
-        <Form.Item
-          name='confirm'
-          dependencies={['password']}
-          rules={[{ required: true, message: '请再次输入密码' },
-          ({ getFieldValue }) => ({
-            validator(_, value) {
-              if (!value || getFieldValue('password') === value) {
-                return Promise.resolve()
-              }
-              return Promise.reject(new Error('两次输入的密码不一致'))
-            },
-          })]}
-        >
-          <Input prefix={<KeyOutlined />} type="password" placeholder='确认密码' />
-        </Form.Item>
-
-        {
-          process.env.NEXT_PUBLIC_REGISTRY_SET === 'true' &&
-          <Form.Item
-            name='authCode'
-            rules={[{ required: true, message: '请输入注册码' }]}
-          >
-            <Input prefix={<CodeOutlined />} placeholder='注册码' />
+          <Form.Item>
+            <p className='mb-2 text-2xl font-bold text-center'>注册</p>
           </Form.Item>
-        }
 
-        <Form.Item>
-          <Flex justify="space-between" align="center" className='mt-2'>
-            <Button type='default' htmlType='button' className='w-[48%]' onClick={() => router.push('/login')}>返回登录</Button>
-            <Button type='primary' htmlType='submit' className='w-[48%]'>立即注册</Button>
-          </Flex>
-        </Form.Item>
-      </Form>
-    </div>
+          <Form.Item
+            name='username'
+            rules={[{ required: true, message: '请输入用户名' },
+              () => ({
+                validator(_, value) {
+                  if (!value || value.length <= 20 && !/\s/.test(value)) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject(new Error('用户名最长20个字符且不能有空格'))
+                },
+              })
+            ]}
+          >
+            <Input prefix={<UserOutlined />} placeholder='用户名 (支持中文)' />
+          </Form.Item>
+
+          <Form.Item
+            name='email'
+            rules={[{ required: true, message: '请输入邮箱地址', },
+              () => ({
+                validator(_, value) {
+                  if (!value || /^[a-z0-9]{1,20}$/.test(value)) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject(new Error('请输入20个字符以内的小写字母或数字'))
+                },
+              })
+            ]}
+          >
+            <Input addonAfter={`@${process.env.NEXT_PUBLIC_MAIL_SERVER}`} prefix={<MailOutlined />} placeholder='邮箱地址' type='text' />
+          </Form.Item>
+
+          <Form.Item
+            name='password'
+            rules={[{ required: true, message: '请输入密码' }]}
+          >
+            <Input prefix={<KeyOutlined />} type="password" placeholder='密码' />
+          </Form.Item>
+
+          <Form.Item
+            name='confirm'
+            dependencies={['password']}
+            rules={[{ required: true, message: '请再次输入密码' },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('password') === value) {
+                  return Promise.resolve()
+                }
+                return Promise.reject(new Error('两次输入的密码不一致'))
+              },
+            })]}
+          >
+            <Input prefix={<KeyOutlined />} type="password" placeholder='确认密码' />
+          </Form.Item>
+
+          {
+            process.env.NEXT_PUBLIC_REGISTRY_SET === 'true' &&
+            <Form.Item
+              name='authCode'
+              rules={[{ required: true, message: '请输入注册码' }]}
+            >
+              <Input prefix={<CodeOutlined />} placeholder='注册码' />
+            </Form.Item>
+          }
+
+          <Form.Item>
+            <Flex justify="space-between" align="center" className='mt-2'>
+              <Button type='default' htmlType='button' className='w-[48%]' onClick={() => router.push('/login')}>返回登录</Button>
+              <Button type='primary' htmlType='submit' className='w-[48%]'>立即注册</Button>
+            </Flex>
+          </Form.Item>
+        </Form>
+      </div>
+    </ConfigProvider>
   )
 }

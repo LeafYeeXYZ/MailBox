@@ -102,7 +102,7 @@ bun run deploy # Deploy the workers
 - [x] 支持 Markdown 写邮件 (Marked)
 - [x] 已发送邮件页面
 - [x] 个人资料页面 (记得游客账户不能修改)
-- [ ] 夜间模式
+- [x] 夜间模式
 - [ ] 找回密码功能 (向备用邮箱发送验证码)
 - [ ] AI 总结邮件内容生成邮件摘要 (Cloudflare Workers AI)
 - [ ] 附件支持

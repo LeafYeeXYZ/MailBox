@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './tailwind.css'
 import { ConfigProvider } from 'antd'
+import { lightTheme } from './config'
 
 export const metadata: Metadata = {
   title: 'MailBox',
@@ -24,12 +25,7 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className='overflow-hidden'>
         <ConfigProvider 
-          theme={{
-            token: {
-              colorPrimary: '#ff8080',
-              colorText: '#4c0519'
-            },
-          }}
+          theme={lightTheme}
         >
           {children}
         </ConfigProvider>

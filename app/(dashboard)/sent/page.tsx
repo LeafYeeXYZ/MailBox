@@ -1,12 +1,13 @@
 'use client'
 
-import { Button, message, Drawer, Popconfirm } from 'antd'
+import { Button, message, Drawer, Popconfirm, ConfigProvider, ThemeConfig } from 'antd'
 import { LoadingOutlined, CaretDownFilled, DeleteOutlined } from '@ant-design/icons'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { getMails, Mail, getEmail, deleteEmail } from './action'
 import { useRouter } from 'next/navigation'
 import { flushSync } from 'react-dom'
 import { set, get, del } from 'idb-keyval'
+import { darkTheme } from '@/app/config'
 
 export default function Sent() {
   
@@ -147,56 +148,69 @@ export default function Sent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
+  // 控制黑暗模式
+  const [themeConfig, setThemeConfig] = useState<ThemeConfig>({})
+  useEffect(() => {
+    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    if (isDarkMode) {
+      setThemeConfig(darkTheme)
+    }
+  }, [])
+  
   return (
-    <div 
-      className='w-full h-full relative flex flex-col justify-start items-center overflow-y-auto overflow-x-hidden'
-      style={{scrollbarWidth: 'none'}}
+    <ConfigProvider
+      theme={themeConfig}
     >
-      <div className='w-full flex flex-row items-center justify-center flex-wrap gap-4'>
-        {mails.map(mail => <EmailPreview key={mail._id} mail={mail} onClick={handleClickEmail} onDelete={handleDeleteEmail} />)}
-      </div>
-      <div className='mt-6 mb-4'>
-        <Button
-          disabled={btn === 'null'}
-          loading={btn === 'loading'}
-          icon={btn === 'loading' ? <LoadingOutlined /> : undefined}
-          onClick={btn === 'loaded' ? () => handleLoadMore(mailsPerPage, mails.length) : undefined}
-        >
-          {btn === 'loading' ? '加载中' : (btn === 'loaded' ? '加载更多' : '没有更多邮件')}
-        </Button>
-      </div>
-      {contextHolder}
-      <Drawer
-        title={email?.subject}
-        placement='bottom'
-        closeIcon={<CaretDownFilled />}
-        onClose={() => {
-          setOpen(false)
-          setLoading(true)
-        }}
-        open={open}
-        loading={loading}
-        height={'90%'}
-        style={{ scrollbarWidth: 'none' }}
-        className='rounded-t-2xl'
+      <div 
+        className='w-full h-full relative flex flex-col justify-start items-center overflow-y-auto overflow-x-hidden'
+        style={{scrollbarWidth: 'none'}}
       >
-        <div className='w-dvw h-[calc(100%-5rem)] absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
-          <div className='w-full h-full flex flex-col sm:flex-row items-start justify-start -mt-8 px-3 gap-1 sm:flex-wrap'>
-            <div className='w-full sm:w-[49.5%] text-left text-xs text-gray-500'>发给 {email?.to}</div>
-            <div className='w-full sm:w-[49.5%] sm:text-right text-left text-xs text-gray-500'>发件人 {`${username} <${useremail}>`}</div>
-            <div className='w-full text-left text-xs text-gray-500'>{new Date(email?.date).toLocaleString()}</div>
-          </div>
-          <div className='w-full h-full border-t'>
-            <iframe
-              srcDoc={email?.content}
-              className='w-full h-full'
-              style={{scrollbarWidth: 'none'}}
-              sandbox=''
-            ></iframe>
-          </div>
+        <div className='w-full flex flex-row items-center justify-center flex-wrap gap-4'>
+          {mails.map(mail => <EmailPreview key={mail._id} mail={mail} onClick={handleClickEmail} onDelete={handleDeleteEmail} />)}
         </div>
-      </Drawer>
-    </div>
+        <div className='mt-6 mb-4'>
+          <Button
+            disabled={btn === 'null'}
+            loading={btn === 'loading'}
+            icon={btn === 'loading' ? <LoadingOutlined /> : undefined}
+            onClick={btn === 'loaded' ? () => handleLoadMore(mailsPerPage, mails.length) : undefined}
+          >
+            {btn === 'loading' ? '加载中' : (btn === 'loaded' ? '加载更多' : '没有更多邮件')}
+          </Button>
+        </div>
+        {contextHolder}
+        <Drawer
+          title={email?.subject}
+          placement='bottom'
+          closeIcon={<CaretDownFilled />}
+          onClose={() => {
+            setOpen(false)
+            setLoading(true)
+          }}
+          open={open}
+          loading={loading}
+          height={'90%'}
+          style={{ scrollbarWidth: 'none' }}
+          className='rounded-t-2xl'
+        >
+          <div className='w-dvw h-[calc(100%-5rem)] absolute left-0 grid grid-rows-[3rem,1fr] sm:grid-rows-[1.75rem,1fr] items-center'>
+            <div className='w-full h-full flex flex-col sm:flex-row items-start justify-start -mt-8 px-3 gap-1 sm:flex-wrap'>
+              <div className='w-full sm:w-[49.5%] text-left text-xs text-gray-500'>发给 {email?.to}</div>
+              <div className='w-full sm:w-[49.5%] sm:text-right text-left text-xs text-gray-500'>发件人 {`${username} <${useremail}>`}</div>
+              <div className='w-full text-left text-xs text-gray-500'>{new Date(email?.date).toLocaleString()}</div>
+            </div>
+            <div className='w-full h-full border-t dark:border-black'>
+              <iframe
+                srcDoc={email?.content}
+                className='w-full h-full'
+                style={{scrollbarWidth: 'none'}}
+                sandbox=''
+              ></iframe>
+            </div>
+          </div>
+        </Drawer>
+      </div>
+    </ConfigProvider>
   )
 }
 
@@ -214,7 +228,7 @@ function EmailPreview({ mail, onClick, onDelete }: { mail: Mail, onClick: (_id: 
   const colorEnd = `rgb(${color()}, ${color()}, ${color()})`
   const data = new Date(mail.date)
   return (
-    <div className='flex flex-col w-full md:w-[48.5%] xl:w-[32.2%] p-4 relative shadow-sm border rounded-xl bg-gray-50 cursor-pointer transition-all hover:scale-[99%] md:hover:scale-[98%]' onClick={() => onClick(mail._id)}>
+    <div className='flex flex-col w-full md:w-[48.5%] xl:w-[32.2%] p-4 relative shadow-sm border rounded-xl bg-gray-50 cursor-pointer transition-all hover:scale-[99%] md:hover:scale-[98%] dark:bg-gray-950 dark:border-black' onClick={() => onClick(mail._id)}>
       <div className='grid relative grid-cols-[2rem,1fr,4rem] gap-[0.6rem] items-center'>
         <div 
           className='w-8 h-4 rounded-full'
@@ -222,11 +236,11 @@ function EmailPreview({ mail, onClick, onDelete }: { mail: Mail, onClick: (_id: 
             background: `linear-gradient(135deg, ${colorStart}, ${colorEnd})`
           }}
         ></div>
-        <div className='text-sm font-bold text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.subject}</div>
-        <div className='text-xs text-gray-500 text-right absolute right-0 top-0'>{`${data.getFullYear().toString().slice(2)}-${data.getMonth() + 1}-${data.getDate()}`}</div>
+        <div className='text-sm dark:text-white font-bold text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.subject}</div>
+        <div className='text-xs text-gray-500 dark:text-gray-400 text-right absolute right-0 top-0'>{`${data.getFullYear().toString().slice(2)}-${data.getMonth() + 1}-${data.getDate()}`}</div>
       </div>
-      <div className='text-xs my-2 text-gray-500 overflow-hidden overflow-ellipsis whitespace-nowrap'>发给 {mail.to}</div>
-      <div className='text-sm w-[calc(100%-2.8rem)] text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.content}</div>
+      <div className='text-xs my-2 text-gray-500 dark:text-gray-400 overflow-hidden overflow-ellipsis whitespace-nowrap'>发给 {mail.to}</div>
+      <div className='text-sm w-[calc(100%-2.8rem)] dark:text-white text-gray-800 overflow-hidden overflow-ellipsis whitespace-nowrap'>{mail.content}</div>
       <Popconfirm
         title='是否确认删除此邮件'
         onConfirm={e => {
