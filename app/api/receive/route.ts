@@ -27,7 +27,22 @@ export async function POST(req: Request): Promise<Response> {
   // 如果没有 html, 将 text 转换为 html
   if (!data.html) {
     data.html = `
-      <html><body><div>${data.text}</div></body></html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            /* 黑色模式响应式 */
+            @media (prefers-color-scheme: dark) {
+              #root {
+                color: #fff;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div id="root">${data.text}</div>
+        </body>
+      </html>
     `
   }
   // 将邮件数据插入到收件箱
