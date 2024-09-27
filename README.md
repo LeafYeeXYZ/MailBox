@@ -5,31 +5,28 @@ MailBox 是一个允许你使用自定义域名进行免费邮件收发的 Serve
 
 ![](./README.png)
 
-#### Demo User: demo@leafyee.xyz
-
-#### Demo Password: 123456
+| Demo User | Demo Password |
+|:---------:|:-------------:|
+|demo@leafyee.xyz|123456|
 
 ## Usage / 部署方法
 ### 1 Get MongoDB Atlas URI
-获取 [MongoDB Atlas](https://www.mongodb.com/) 的数据库 URI
 
 Create a new project in [MongoDB Atlas](https://www.mongodb.com/) and get the URI of the cluster. The URI should be like `mongodb+srv://<username>:<password>@xxxxxxx.xxxxxxxx.xxxxx?xxxx=xxxx&xxxx=xxxx`, remember to replace `<username>` and `<password>` with your own.
 
-在 [MongoDB Atlas](https://www.mongodb.com/) 中创建一个新的项目并获取集群的 URI。URI 应该类似于 `mongodb+srv://<username>:<password>@xxxxxxx.xxxxxxxx.xxxxx?xxxx=xxxx&xxxx=xxxx`，请记得将 `<username>` 和 `<password>` 替换为你自己的
+> 获取 [MongoDB Atlas](https://www.mongodb.com/) 的数据库 URI: 在 [MongoDB Atlas](https://www.mongodb.com/) 中创建一个新的项目并获取集群的 URI。URI 应该类似于 `mongodb+srv://<username>:<password>@xxxxxxx.xxxxxxxx.xxxxx?xxxx=xxxx&xxxx=xxxx`，请记得将 `<username>` 和 `<password>` 替换为你自己的
 
 ### 2 Get Resend API Key
-获取 [Resend](https://resend.com/) 的 API key
 
 Create a new project in [Resend](https://resend.com/), and create a new API key. Note that the domain you use in Resend should be the same as the domain you use in Cloudflare.
 
-在 [Resend](https://resend.com/) 中创建一个新的项目并创建一个新的 API key。请注意你在 Resend 中使用的域名应该和你在 Cloudflare 中使用的域名相同
+> 获取 [Resend](https://resend.com/) 的 API key: 在 [Resend](https://resend.com/) 中创建一个新的项目并创建一个新的 API key。请注意你在 Resend 中使用的域名应该和你在 Cloudflare 中使用的域名相同
 
 ### 3 Deploy to Vercel
-部署到 [Vercel](https://vercel.com/)
 
 Deploy this `Next.js` project to `Vercel` with the following environment variables in `Vercel` or `.env` file.
 
-在 `Vercel` 中部署这个 `Next.js` 项目，并在 `Vercel` 或 `.env` 文件中设置以下环境变量
+> 部署到 [Vercel](https://vercel.com/): 在 `Vercel` 中部署这个 `Next.js` 项目，并在 `Vercel` 或 `.env` 文件中设置以下环境变量
 
 | Variable | Description | Default | Required |
 |:--------:|:-----------:|:-------:|:--------:|
@@ -41,11 +38,10 @@ Deploy this `Next.js` project to `Vercel` with the following environment variabl
 | `NEXT_PUBLIC_REGISTRY_SET` | If `REGISTRY_KEY` is set, this should be set to `true` | | |
 
 ### 4 Config Workers Environment Variables
-设置 Cloudflare Workers 的环境变量
 
 Create `/workers/wrangler.toml` and add the following content. Remember to replace `<YOUR_NEXTJS_PROJECT_DOMAIN>` and `<YOUR_PEER_AUTH_KEY>` with your own.
 
-创建 `/workers/wrangler.toml` 并添加以下内容, 请记得将 `<YOUR_NEXTJS_PROJECT_DOMAIN>` 和 `<YOUR_PEER_AUTH_KEY>` 替换为你自己的
+> 设置 Cloudflare Workers 的环境变量: 创建 `/workers/wrangler.toml` 并添加以下内容, 请记得将 `<YOUR_NEXTJS_PROJECT_DOMAIN>` 和 `<YOUR_PEER_AUTH_KEY>` 替换为你自己的
 
 ```toml
 #:schema node_modules/wrangler/config-schema.json
@@ -57,14 +53,16 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 NEXT_ENDPOINT = "https://<YOUR_NEXTJS_PROJECT_DOMAIN>/api/receive"
 PEER_AUTH_KEY = "<YOUR_PEER_AUTH_KEY>"
+
+[observability]
+enabled = true
 ```
 
 ### 5 Deploy Workers
-部署 Cloudflare Workers
 
 Run the following command to deploy the workers.
 
-运行以下命令部署 Cloudflare Workers
+> 部署 Cloudflare Workers: 运行以下命令部署 Cloudflare Workers
 
 ```bash
 cd ./workers # Change to workers directory to Workers project
@@ -74,7 +72,6 @@ bun run deploy # Deploy the workers
 ```
 
 ### 6 Config Cloudflare Mail route
-设置 Cloudflare 的邮件路由
 
 1. Go to your domain's Cloudflare dashboard.
 2. Click on the `Email` tab.
@@ -82,13 +79,7 @@ bun run deploy # Deploy the workers
 4. Click on `Routing Rules`.
 5. Set `Catch All` to forward all mail to the workers you just deployed.
 
----
-
-1. 进入你的域名的 Cloudflare 控制台
-2. 点击 `电子邮件`
-3. 点击 `邮件路由`
-4. 点击 `路由规则`
-5. 设置 `Catch All` 为转发所有邮件到你刚刚部署的 Worker
+> 设置 Cloudflare 的邮件路由: 进入你的域名的 Cloudflare 控制台 -> 点击 `电子邮件` -> 点击 `邮件路由` -> 点击 `路由规则` -> 设置 `Catch All` 为转发所有邮件到你刚刚部署的 Worker
 
 ## License
 [GPL-3.0](./LICENSE)
