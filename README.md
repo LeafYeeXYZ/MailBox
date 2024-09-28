@@ -7,7 +7,7 @@ MailBox 是一个允许你使用自定义域名进行免费邮件收发的 Serve
 
 | Demo User | Demo Password |
 |:---------:|:-------------:|
-|demo@leafyee.xyz|123456|
+|demo@o0-0o.icu|123456|
 
 ## Usage / 部署方法
 ### 1 Get MongoDB Atlas URI
