@@ -1,3 +1,7 @@
+## This project is no longer maintained. It is recommended to use iCloud+ custom domain email service instead.
+
+## 已停止维护, 建议使用 iCloud+ 的自定义域名邮件服务
+
 # MailBox
 MailBox is a web application that allows you to send and receive emails serverlessly and costlessly with your custom domain.
 
